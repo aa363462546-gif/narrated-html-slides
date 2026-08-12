@@ -1,0 +1,8 @@
+This project includes design-process ideas adapted from the MIT-licensed
+frontend-slides project by Zara Zhang. No upstream template pack is required
+at runtime.
+
+Bundled fonts are distributed under their original licenses:
+- Manrope: SIL Open Font License 1.1
+- Smiley Sans: SIL Open Font License 1.1, Copyright 2022-2024 atelierAnchor
+- IBM Plex Sans SC: SIL Open Font License 1.1

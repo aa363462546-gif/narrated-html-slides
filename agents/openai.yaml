@@ -1,0 +1,4 @@
+interface:
+  display_name: "Narrated HTML Slides"
+  short_description: "Turn articles into stable HTML slides with A/B templates"
+  default_prompt: "Use $narrated-html-slides to turn this article into stable HTML slides."

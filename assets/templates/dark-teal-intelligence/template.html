@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dark Teal Intelligence｜三层固定母版</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: "Manrope Local";
+      src: url("../../fonts/manrope/Manrope-Variable.ttf") format("truetype");
+      font-weight: 400 800;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "IBM Plex Sans SC Local";
+      src: url("../../fonts/ibm-plex-sans-sc/IBMPlexSansSC-Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "IBM Plex Sans SC Local";
+      src: url("../../fonts/ibm-plex-sans-sc/IBMPlexSansSC-Medium.woff2") format("woff2");
+      font-weight: 500 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Smiley Sans Local";
+      src: url("../../fonts/smiley-sans/SmileySans-Oblique.otf") format("opentype");
+      font-weight: 600 800;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* === IMMUTABLE VISUAL CONTRACT === */
+    :root {
+      --outer: #000000;
+      --canvas: #202324;
+      --surface: #292B2C;
+      --surface-deep: #17191A;
+      --ink: #F3F4F2;
+      --ink-secondary: #D6D9D7;
+      --muted: #A4AAA8;
+      --line: rgba(185, 190, 188, .28);
+      --line-strong: rgba(231, 233, 231, .48);
+      --aqua: #18E3D0;
+      --aqua-soft: #86EEE6;
+      --teal: #0A5556;
+      --font-latin: "Manrope Local", sans-serif;
+      --font-display: "Smiley Sans Local", "Manrope Local", "IBM Plex Sans SC Local", sans-serif;
+      --font-body: "IBM Plex Sans SC Local", "Manrope Local", sans-serif;
+      --font-mono: "IBM Plex Mono", "IBM Plex Sans SC Local", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--outer); }
+    body { color: var(--ink); font-family: var(--font-body); -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
+    h1, h2, h3, p { margin: 0; }
+
+    /* === FIXED 1920 × 1080 STAGE === */
+    .deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--outer); cursor: pointer; }
+    .deck-stage {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      transform-origin: 0 0;
+      background: var(--canvas);
+    }
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      background: var(--canvas);
+    }
+    .slide.active { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+    .wash-left { background: linear-gradient(110deg, #0A5556 0%, #202324 58%, #202324 100%); }
+    .wash-right {
+      background:
+        linear-gradient(110deg, rgba(32,35,36,1) 0%, rgba(32,35,36,1) 42%, rgba(10,85,86,.76) 72%, rgba(125,220,224,.24) 100%),
+        var(--canvas);
+    }
+
+    /* === SHARED REPORT CHROME === */
+    .report-frame { position: absolute; left: 60px; top: 58px; width: 1800px; height: 960px; border: 1px solid var(--line); }
+    .header-rule { position: absolute; left: 96px; top: 304px; width: 1728px; border-top: 1px solid var(--line-strong); }
+    .footer-rule { position: absolute; left: 60px; top: 960px; width: 1800px; border-top: 1px solid var(--line); }
+    .footer-logo, .footer-year, .footer-page {
+      position: absolute;
+      top: 978px;
+      height: 24px;
+      font: 400 18px/24px var(--font-mono);
+      color: var(--muted);
+    }
+    .footer-logo { left: 96px; width: 560px; }
+    .footer-year { left: 1510px; width: 120px; text-align: right; }
+    .footer-page { left: 1750px; width: 102px; color: var(--ink-secondary); text-align: right; }
+
+    /* === TYPE ROLES === */
+    .section-label {
+      font: 500 24px/1.2 var(--font-mono);
+      letter-spacing: .04em;
+      color: var(--aqua);
+    }
+    .headline {
+      font: 700 76px/1.08 var(--font-display);
+      letter-spacing: -.025em;
+      color: var(--ink);
+    }
+    .hero-title {
+      font: 700 104px/1.06 var(--font-display);
+      letter-spacing: -.035em;
+      color: var(--ink);
+    }
+    .subhead { font: 600 48px/1.14 var(--font-display); letter-spacing: -.02em; }
+    .lead { font: 500 48px/1.32 var(--font-body); color: var(--ink-secondary); }
+    .body-copy { font: 400 48px/1.38 var(--font-body); color: var(--ink-secondary); }
+    .component-copy { font: 400 36px/1.38 var(--font-body); color: var(--ink-secondary); }
+    .chart-label { font: 500 36px/1.28 var(--font-body); color: var(--ink-secondary); }
+    .meta { font: 500 20px/1.25 var(--font-mono); letter-spacing: .02em; color: var(--muted); }
+    .metric { font: 700 118px/.92 var(--font-display); color: var(--aqua); letter-spacing: -.02em; }
+    .metric-hero { font: 700 164px/.88 var(--font-display); color: var(--aqua); letter-spacing: -.03em; }
+    .metric-unit { font: 500 30px/1 var(--font-mono); color: var(--aqua-soft); }
+    .slot-note { font: 500 24px/1.35 var(--font-mono); color: var(--muted); text-align: center; }
+
+    /* === COMMON HEADER === */
+    .page-head { position: absolute; left: 96px; top: 82px; width: 1728px; height: 205px; }
+    .page-head .headline { margin-top: 22px; max-width: 1640px; }
+
+    /* === HERO: FINITE FIXED VARIANTS === */
+    .hero-logo { position: absolute; left: 72px; top: 70px; width: 420px; height: 50px; font: 500 20px/50px var(--font-mono); color: var(--ink-secondary); }
+    .hero-date { position: absolute; right: 72px; top: 70px; width: 180px; height: 50px; font: 500 20px/50px var(--font-mono); color: var(--muted); text-align: right; }
+    .hero-copy { position: absolute; display: flex; flex-direction: column; justify-content: center; }
+    .hero-copy .section-label { margin-bottom: 38px; }
+    .hero-copy .hero-title { max-height: 350px; overflow: hidden; }
+    .hero-evidence { position: absolute; border: 1px solid var(--line-strong); background: var(--surface-deep); overflow: hidden; }
+    .hero-evidence::before {
+      content: "";
+      position: absolute;
+      inset: 64px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, transparent 49.8%, var(--line) 50%, transparent 50.2%),
+        linear-gradient(0deg, transparent 49.8%, var(--line) 50%, transparent 50.2%);
+    }
+    .hero-evidence .metric-lock { position: absolute; left: 74px; bottom: 72px; }
+    .hero-evidence .meta { margin-bottom: 20px; }
+    .slide[data-layout="hero"][data-variant="center"] .hero-copy { left: 240px; top: 236px; width: 1440px; height: 610px; text-align: center; align-items: center; }
+    .slide[data-layout="hero"][data-variant="center"] .hero-title { width: 1380px; }
+    .slide[data-layout="hero"][data-variant="lower-left"] .hero-copy { left: 96px; top: 450px; width: 1420px; height: 430px; }
+    .slide[data-layout="hero"][data-variant="lower-left"] .hero-title { width: 1380px; }
+    .slide[data-layout="hero"][data-variant="split-visual"] .hero-copy { left: 96px; top: 220px; width: 820px; height: 650px; }
+    .slide[data-layout="hero"][data-variant="split-visual"] .hero-title { width: 820px; }
+    .slide[data-layout="hero"][data-variant="split-visual"] .hero-evidence { left: 1040px; top: 160px; width: 720px; height: 720px; }
+
+    /* === EDITORIAL: BALANCED / EVIDENCE-WIDE === */
+    .editorial-lead, .evidence-panel { position: absolute; }
+    .editorial-lead .body-copy { margin-top: 30px; }
+    .evidence-panel { padding: 48px; background: var(--surface-deep); border-top: 2px solid var(--aqua); }
+    .evidence-panel .subhead { margin-top: 52px; }
+    .evidence-panel .body-copy { margin-top: 28px; }
+    .slide[data-layout="editorial"][data-variant="balanced"] .editorial-lead { left: 96px; top: 382px; width: 720px; height: 480px; }
+    .slide[data-layout="editorial"][data-variant="balanced"] .evidence-panel { left: 900px; top: 382px; width: 924px; height: 480px; }
+    .slide[data-layout="editorial"][data-variant="evidence-wide"] .editorial-lead { left: 96px; top: 340px; width: 1728px; height: 90px; }
+    .slide[data-layout="editorial"][data-variant="evidence-wide"] .evidence-panel { left: 96px; top: 466px; width: 1728px; height: 414px; padding: 42px 52px; display: grid; grid-template-columns: 160px 320px 1fr 250px; gap: 36px; align-items: center; }
+    .slide[data-layout="editorial"][data-variant="evidence-wide"] .evidence-panel .subhead,
+    .slide[data-layout="editorial"][data-variant="evidence-wide"] .evidence-panel .body-copy { margin-top: 0; }
+    .slide[data-layout="editorial"][data-variant="evidence-wide"] .evidence-panel .body-copy { font-size: 36px; }
+
+    /* === SPLIT PROOF === */
+    .photo-slot, .split-panel { position: absolute; }
+    .photo-slot { background: var(--surface-deep); border: 1px solid var(--line); display: grid; place-items: center; }
+    .photo-slot::before { content: ""; position: absolute; inset: 44px; border: 1px solid var(--line); }
+    .split-panel .headline { margin-top: 24px; }
+    .split-statement { position: absolute; left: 0; top: 350px; width: 100%; padding-top: 42px; border-top: 1px solid var(--line-strong); }
+    .split-statement .body-copy { margin-top: 32px; max-width: 760px; }
+    .slide[data-layout="split-proof"][data-variant="image-left"] .photo-slot { left: 60px; top: 60px; width: 780px; height: 880px; }
+    .slide[data-layout="split-proof"][data-variant="image-left"] .split-panel { left: 920px; top: 90px; width: 820px; height: 800px; }
+    .slide[data-layout="split-proof"][data-variant="image-right"] .split-panel { left: 96px; top: 90px; width: 820px; height: 800px; }
+    .slide[data-layout="split-proof"][data-variant="image-right"] .photo-slot { left: 1080px; top: 60px; width: 780px; height: 880px; }
+
+    /* === PORTRAIT VARIANTS === */
+    .portrait-title { position: absolute; left: 96px; top: 82px; width: 1728px; height: 160px; text-align: center; }
+    .portrait-title .headline { margin-top: 22px; }
+    .portrait { position: absolute; background: var(--surface-deep); border: 1px solid var(--line); display: grid; place-items: center; }
+    .portrait-caption { position: absolute; text-align: center; }
+    .portrait-caption .body-copy { margin-top: 16px; }
+    .portrait-caption .body-copy,
+    .value-card .body-copy,
+    .arc-label .body-copy,
+    .road-circle .body-copy { font-size: 36px; }
+    .slide[data-layout="portrait"][data-variant="balanced"] .portrait.a { left: 500px; top: 300px; width: 360px; height: 400px; }
+    .slide[data-layout="portrait"][data-variant="balanced"] .portrait.b { left: 1060px; top: 300px; width: 360px; height: 400px; }
+    .slide[data-layout="portrait"][data-variant="balanced"] .portrait-caption.a { left: 500px; top: 730px; width: 360px; }
+    .slide[data-layout="portrait"][data-variant="balanced"] .portrait-caption.b { left: 1060px; top: 730px; width: 360px; }
+    .slide[data-layout="portrait"][data-variant="featured-left"] .portrait.a { left: 240px; top: 300px; width: 520px; height: 520px; }
+    .slide[data-layout="portrait"][data-variant="featured-left"] .portrait.b { left: 1430px; top: 380px; width: 320px; height: 360px; }
+    .slide[data-layout="portrait"][data-variant="featured-left"] .portrait-caption.a { left: 800px; top: 420px; width: 520px; text-align: left; }
+    .slide[data-layout="portrait"][data-variant="featured-left"] .portrait-caption.b { left: 1430px; top: 770px; width: 320px; text-align: left; }
+
+    /* === VALUES GRID VARIANTS === */
+    .values-grid { position: absolute; left: 96px; width: 1728px; display: grid; }
+    .value-card { padding: 34px 40px; background: var(--surface); border: 1px solid var(--line); overflow: hidden; }
+    .value-index { font: 600 22px/1 var(--font-mono); color: var(--aqua); }
+    .value-card .subhead { margin-top: 30px; }
+    .value-card .body-copy { margin-top: 20px; }
+    .slide[data-layout="values-grid"][data-variant="four-up"] .values-grid { top: 330px; height: 598px; grid-template-columns: 848px 848px; grid-template-rows: 283px 283px; gap: 32px; }
+    .slide[data-layout="values-grid"][data-variant="four-up"] .value-card { padding: 22px 40px; }
+    .slide[data-layout="values-grid"][data-variant="four-up"] .value-card .subhead { margin-top: 16px; }
+    .slide[data-layout="values-grid"][data-variant="four-up"] .value-card .body-copy { margin-top: 12px; line-height: 1.28; }
+    .slide[data-layout="values-grid"][data-variant="two-up-wide"] .values-grid { top: 350px; height: 540px; grid-template-columns: 1fr; grid-template-rows: 256px 256px; gap: 28px; }
+    .slide[data-layout="values-grid"][data-variant="two-up-wide"] .value-card { display: grid; grid-template-columns: 120px 480px 1fr; gap: 40px; align-items: center; }
+    .slide[data-layout="values-grid"][data-variant="two-up-wide"] .value-card .subhead,
+    .slide[data-layout="values-grid"][data-variant="two-up-wide"] .value-card .body-copy { margin-top: 0; }
+
+    /* === TIMELINE: FULL EVIDENCE ZONE === */
+    .timeline-panel { position: absolute; left: 96px; top: 340px; width: 1728px; height: 560px; }
+    .timeline-label { position: absolute; top: 0; width: 320px; min-height: 88px; }
+    .timeline-label.end { transform: translateX(-100%); text-align: right; }
+    .timeline-label .step-no { font-size: 22px; font-family: var(--font-mono); font-weight: 600; line-height: 1; color: var(--aqua); }
+    .timeline-label .chart-label { font-size: 36px; margin-top: 14px; color: var(--ink); }
+    .timeline-svg { position: absolute; left: 0; top: 112px; width: 1728px; height: 410px; overflow: visible; }
+
+    /* === REVENUE ARC === */
+    .arc-region { position: absolute; left: 96px; top: 330px; width: 1728px; height: 570px; }
+    .arc-svg { position: absolute; inset: 0; width: 1728px; height: 570px; overflow: visible; }
+    .arc-label { position: absolute; width: 300px; }
+    .arc-label .chart-label { color: var(--ink); }
+    .arc-label .body-copy { margin-top: 10px; }
+
+    /* === METRIC VARIANTS === */
+    .metric-grid { position: absolute; left: 96px; top: 390px; width: 1728px; height: 490px; display: grid; gap: 32px; }
+    .metric-card { min-width: 0; padding: 42px 34px; border-top: 2px solid var(--aqua); background: var(--surface); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; overflow: hidden; }
+    .metric-card .metric-label { margin-top: 36px; font: 500 32px/1.22 var(--font-body); }
+    .metric-card .metric-note { margin-top: 20px; font: 400 36px/1.30 var(--font-body); color: var(--ink-secondary); }
+    .tick-band { margin-top: 26px; width: 100%; height: 8px; background: var(--surface-deep); }
+    .tick-band i { display: block; height: 8px; background: var(--aqua); }
+    .slide[data-layout="metric"][data-variant="two-up"] .metric-grid { grid-template-columns: 848px 848px; }
+    .slide[data-layout="metric"][data-variant="three-up"] .metric-grid { grid-template-columns: repeat(3, 554px); }
+    .slide[data-layout="metric"][data-variant="five-up"] .metric-grid { grid-template-columns: repeat(5, 320px); }
+    .slide[data-layout="metric"][data-variant="five-up"] .metric-card { padding: 36px 20px; }
+    .slide[data-layout="metric"][data-variant="five-up"] .metric { font-size: 92px; }
+    .slide[data-layout="metric"][data-variant="five-up"] .metric-card .metric-note { font-size: 36px; }
+
+    /* === AUDIENCE CIRCLES === */
+    .audience-region { position: absolute; left: 96px; top: 360px; width: 1728px; height: 540px; }
+    .audience-circle { position: absolute; border: 2px solid var(--aqua); border-radius: 50%; background: rgba(32,35,36,.88); display: grid; place-items: center; text-align: center; }
+    .audience-circle .chart-label { margin-top: 18px; }
+    .slide[data-layout="audience"][data-variant="wide"] .audience-circle { top: 60px; width: 420px; height: 420px; }
+    .slide[data-layout="audience"][data-variant="compact"] .audience-circle { top: 120px; width: 300px; height: 300px; }
+
+    /* === MAP VARIANTS === */
+    .map-slot, .map-metric { position: absolute; }
+    .map-slot {
+      border: 1px solid var(--line-strong);
+      background:
+        linear-gradient(90deg, transparent 49.9%, var(--line) 50%, transparent 50.1%),
+        linear-gradient(0deg, transparent 49.9%, var(--line) 50%, transparent 50.1%),
+        var(--surface-deep);
+      background-size: 120px 120px;
+      display: grid;
+      place-items: center;
+    }
+    .map-metric .metric-label { margin-top: 30px; font: 600 38px/1.2 var(--font-display); }
+    .slide[data-layout="map"][data-variant="map-left"] .map-slot { left: 96px; top: 360px; width: 1160px; height: 500px; }
+    .slide[data-layout="map"][data-variant="map-left"] .map-metric { left: 1340px; top: 520px; width: 430px; }
+    .slide[data-layout="map"][data-variant="map-right"] .map-metric { left: 96px; top: 500px; width: 430px; }
+    .slide[data-layout="map"][data-variant="map-right"] .map-slot { left: 620px; top: 360px; width: 1160px; height: 500px; }
+
+    /* === ROADMAP VARIANTS === */
+    .roadmap-region { position: absolute; left: 96px; top: 330px; width: 1728px; height: 570px; }
+    .road-circle { position: absolute; border: 2px solid var(--aqua); border-radius: 50%; background: rgba(32,35,36,.80); display: grid; place-items: center; text-align: center; }
+    .road-copy { width: 240px; }
+    .road-step { font: 600 22px/1 var(--font-mono); color: var(--aqua); }
+    .road-circle .subhead { margin-top: 18px; }
+    .road-circle .body-copy { margin-top: 14px; font-size: 36px; }
+    .slide[data-layout="roadmap"][data-variant="overlap-four"] .road-circle { top: 100px; width: 360px; height: 360px; }
+    .slide[data-layout="roadmap"][data-variant="sequence-three"] .road-circle { top: 60px; width: 430px; height: 430px; }
+    .slide[data-layout="roadmap"][data-variant="sequence-three"] .roadmap-region::before { content: ""; position: absolute; left: 170px; right: 170px; top: 274px; border-top: 1px solid var(--line-strong); }
+
+    /* === PRESERVED PPT-DERIVED SIGNATURE FAMILIES === */
+    .dual-signal-board { position: absolute; left: 1050px; top: 178px; width: 720px; height: 720px; display: grid; grid-template-rows: 1fr 1fr; border: 1px solid var(--line-strong); }
+    .dual-signal-copy { position: absolute; left: 96px; top: 250px; width: 820px; height: 580px; display: flex; flex-direction: column; justify-content: center; }
+    .dual-signal-copy .hero-title { font-size: 88px; }
+    .signal-row { padding: 54px 30px; display: grid; grid-template-columns: 310px 1fr; column-gap: 20px; align-items: center; }
+    .signal-row + .signal-row { border-top: 1px solid var(--line-strong); }
+    .signal-value { font: 700 112px/.9 var(--font-latin); color: var(--aqua); letter-spacing: -.04em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .signal-label { font: 600 48px/1.18 var(--font-display); }
+    .signal-note { margin-top: 18px; font: 400 36px/1.35 var(--font-body); color: var(--ink-secondary); }
+
+    .statement-mark-region { position: absolute; left: 96px; top: 360px; width: 1728px; height: 500px; display: grid; grid-template-columns: 1fr 430px; column-gap: 96px; align-items: center; border-top: 1px solid var(--line-strong); border-bottom: 1px solid var(--line); }
+    .statement-copy { padding-left: 28px; }
+    .statement-quote { font: 600 58px/1.28 var(--font-body); color: var(--ink); max-width: 1120px; }
+    .statement-note { margin-top: 54px; max-width: 1080px; font: 400 40px/1.40 var(--font-body); color: var(--ink-secondary); }
+    .statement-mark { justify-self: end; font: 700 230px/.86 var(--font-display); color: var(--aqua); letter-spacing: -.05em; }
+
+    .sequence-four-grid { position: absolute; left: 96px; top: 380px; width: 1728px; height: 500px; display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line-strong); }
+    .sequence-card { min-width: 0; padding: 40px 36px; display: flex; flex-direction: column; justify-content: center; }
+    .sequence-card + .sequence-card { border-left: 1px solid var(--line-strong); }
+    .sequence-number { font: 700 76px/.9 var(--font-display); color: var(--aqua); }
+    .sequence-title { margin-top: 36px; font: 600 42px/1.18 var(--font-display); color: var(--ink); }
+    .sequence-bar { margin-top: 32px; width: 100%; height: 8px; background: rgba(255,255,255,.16); }
+    .sequence-bar i { display: block; height: 100%; background: var(--aqua); }
+    .sequence-note { margin-top: 34px; font: 400 36px/1.34 var(--font-body); color: var(--ink-secondary); }
+
+    .capability-boundary { position: absolute; left: 96px; top: 380px; width: 1728px; height: 500px; display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line-strong); }
+    .capability-side { padding: 38px 64px 20px 0; }
+    .capability-side + .capability-side { padding-left: 96px; border-left: 1px solid var(--line-strong); }
+    .capability-mark { font: 700 140px/.9 var(--font-latin); color: var(--aqua); }
+    .capability-side:last-child .capability-mark { color: var(--ink); }
+    .capability-title { margin-top: 24px; font: 600 48px/1.16 var(--font-display); }
+    .capability-copy { margin-top: 24px; font: 400 40px/1.38 var(--font-body); color: var(--ink-secondary); }
+    .capability-caption { margin-top: 22px; font: 400 36px/1.34 var(--font-body); color: var(--muted); }
+
+    .evidence-stack-region { position: absolute; left: 96px; top: 370px; width: 1728px; height: 510px; display: grid; grid-template-columns: 180px 520px 130px 1fr; align-items: center; }
+    .evidence-index { font: 700 120px/.9 var(--font-display); color: var(--aqua); }
+    .evidence-stack { display: grid; gap: 18px; }
+    .evidence-stack-item { min-height: 94px; padding: 24px 30px; border: 1px solid var(--line-strong); font: 500 38px/1.18 var(--font-body); display: flex; align-items: center; }
+    .evidence-arrow { font: 500 88px/1 var(--font-display); color: var(--aqua); text-align: center; }
+    .evidence-explanation { padding-left: 50px; border-left: 1px solid var(--line-strong); }
+    .evidence-explanation .subhead { font-size: 54px; }
+    .evidence-explanation .component-copy { margin-top: 30px; }
+
+    .evidence-hero-region { position: absolute; left: 96px; top: 365px; width: 1728px; height: 515px; display: grid; grid-template-columns: 590px 1fr; align-items: center; border-top: 1px solid var(--line-strong); }
+    .evidence-hero-metric { font: 700 176px/.86 var(--font-display); color: var(--aqua); letter-spacing: -.04em; }
+    .evidence-hero-label { margin-top: 34px; font: 600 44px/1.18 var(--font-display); color: var(--ink); }
+    .evidence-hero-copy { padding-left: 80px; border-left: 1px solid var(--line-strong); }
+    .evidence-hero-copy .subhead { font-size: 60px; line-height: 1.16; }
+    .evidence-hero-copy .component-copy { margin-top: 36px; max-width: 880px; }
+
+    /* === NAVIGATION === */
+    .deck-counter { position: fixed; right: 22px; bottom: 18px; z-index: 20; font: 500 13px/1 var(--font-mono); color: rgba(255,255,255,.54); }
+
+    @media print {
+      html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+      .deck-viewport { position: static; overflow: visible; }
+      .deck-stage { position: static; width: auto; height: auto; transform: none !important; }
+      .slide { position: relative; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; break-after: page; }
+      .deck-counter { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="deck-viewport">
+  <main class="deck-stage" id="deckStage" data-stage-width="1920" data-stage-height="1080">
+    <!-- HERO / CENTER -->
+    <section class="slide wash-right active" id="slide-1" data-layout="hero" data-variant="center">
+      <div class="hero-logo">DARK TEAL / SYSTEM</div><div class="hero-date">2026 · 08</div>
+      <div class="hero-copy" data-qa-box>
+        <div class="section-label">三层固定 · 01</div>
+        <h1 class="hero-title">规则不动，<br>位置不再僵硬</h1>
+      </div>
+    </section>
+
+    <!-- HERO / LOWER LEFT -->
+    <section class="slide wash-left" id="slide-2" data-layout="hero" data-variant="lower-left">
+      <div class="hero-logo">DARK TEAL / POSITION</div><div class="hero-date">02 / 24</div>
+      <div class="hero-copy" data-qa-box>
+        <div class="section-label">LOWER-LEFT ANCHOR</div>
+        <h1 class="hero-title">让内容决定重心，<br>而不是服从空框</h1>
+      </div>
+    </section>
+
+    <!-- HERO / SPLIT VISUAL -->
+    <section class="slide wash-right" id="slide-3" data-layout="hero" data-variant="split-visual">
+      <div class="hero-logo">DARK TEAL / EVIDENCE</div><div class="hero-date">03 / 24</div>
+      <div class="hero-copy" data-qa-box>
+        <div class="section-label">SPLIT VISUAL</div>
+        <h1 class="hero-title">一套系统，<br>三层稳定性</h1>
+      </div>
+      <div class="hero-evidence" data-qa-box><div class="metric-lock"><div class="meta">APPROVED VARIANTS</div><div><span class="metric-hero">24</span><span class="metric-unit">PAGES</span></div></div></div>
+    </section>
+
+    <!-- EDITORIAL / BALANCED -->
+    <section class="slide" id="slide-4" data-layout="editorial" data-variant="balanced">
+      <div class="report-frame"></div><div class="header-rule"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">EDITORIAL / BALANCED</div><h2 class="headline">版式不是坐标仓库</h2></header>
+      <div class="editorial-lead" data-qa-box><p class="lead">稳定来自明确边界，不是把所有内容锁在同一个位置。</p><p class="body-copy">同等重要的解释和证据，各自占据完整、可读的区域。</p></div>
+      <aside class="evidence-panel" data-qa-box><div class="meta">EVIDENCE / 04</div><h3 class="subhead">一半讲判断，<br>一半给证据</h3><p class="body-copy">两块区域同高，文字不缩成注脚，证据也不退成角落黑块。</p></aside>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">04 / 24</div>
+    </section>
+
+    <!-- EDITORIAL / EVIDENCE WIDE -->
+    <section class="slide" id="slide-5" data-layout="editorial" data-variant="evidence-wide">
+      <div class="report-frame"></div><div class="header-rule"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">EDITORIAL / EVIDENCE-WIDE</div><h2 class="headline">证据重要时，就让它占满</h2></header>
+      <div class="editorial-lead" data-qa-box><p class="lead">大表格、关键引用和代码，不再被压进一个小卡片。</p></div>
+      <aside class="evidence-panel" data-qa-box><div class="meta">RULE</div><h3 class="subhead">1728 × 414</h3><p class="body-copy">整条证据带使用页面全部可用宽度；横线停在内容上方，不穿过表格边框。</p><div class="metric"><span>100</span><span class="metric-unit">%</span></div></aside>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">05 / 24</div>
+    </section>
+
+    <!-- SPLIT PROOF / IMAGE LEFT -->
+    <section class="slide" id="slide-6" data-layout="split-proof" data-variant="image-left">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <div class="photo-slot" data-qa-box><div class="slot-note">真实图片 / 产品截图<br>IMAGE LEFT</div></div>
+      <div class="split-panel" data-qa-box><div class="section-label">SPLIT PROOF / LEFT</div><h2 class="headline">证据先进入视线</h2><div class="split-statement"><h3 class="subhead">右侧只保留一个判断</h3><p class="body-copy">图片承担事实，文字负责解释；两边不争夺同一个视觉层级。</p></div></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">06 / 24</div>
+    </section>
+
+    <!-- SPLIT PROOF / IMAGE RIGHT -->
+    <section class="slide" id="slide-7" data-layout="split-proof" data-variant="image-right">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <div class="split-panel" data-qa-box><div class="section-label">SPLIT PROOF / RIGHT</div><h2 class="headline">先提出问题，<br>再展示画面</h2><div class="split-statement"><h3 class="subhead">右侧保留完整证据</h3><p class="body-copy">适合教程步骤、产品界面和需要先建立语境的真实截图。</p></div></div>
+      <div class="photo-slot" data-qa-box><div class="slot-note">真实图片 / 数据来源<br>IMAGE RIGHT</div></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">07 / 24</div>
+    </section>
+
+    <!-- PORTRAIT / BALANCED -->
+    <section class="slide" id="slide-8" data-layout="portrait" data-variant="balanced">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="portrait-title" data-qa-box><div class="section-label">PORTRAIT / BALANCED</div><h2 class="headline">同层级比较</h2></header>
+      <div class="portrait a" data-qa-box><div class="slot-note">对象 A</div></div><div class="portrait b" data-qa-box><div class="slot-note">对象 B</div></div>
+      <div class="portrait-caption a" data-qa-box><h3 class="subhead">稳定</h3><p class="body-copy">成熟生态与可靠预览</p></div><div class="portrait-caption b" data-qa-box><h3 class="subhead">成长</h3><p class="body-copy">新能力与更高不确定性</p></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">08 / 24</div>
+    </section>
+
+    <!-- PORTRAIT / FEATURED LEFT -->
+    <section class="slide" id="slide-9" data-layout="portrait" data-variant="featured-left">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="portrait-title" data-qa-box><div class="section-label">PORTRAIT / FEATURED</div><h2 class="headline">主次关系明确</h2></header>
+      <div class="portrait a" data-qa-box><div class="slot-note">主要对象</div></div><div class="portrait b" data-qa-box><div class="slot-note">参照对象</div></div>
+      <div class="portrait-caption a" data-qa-box><h3 class="subhead">主要证据占更大面积</h3><p class="body-copy">当叙事并不对等时，不强行做成两个同样大小的人物卡。</p></div>
+      <div class="portrait-caption b" data-qa-box><h3 class="subhead">参照</h3><p class="body-copy">只保留必要说明</p></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">09 / 24</div>
+    </section>
+
+    <!-- VALUES / FOUR UP -->
+    <section class="slide" id="slide-10" data-layout="values-grid" data-variant="four-up">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">VALUES / FOUR-UP</div><h2 class="headline">四个判断，等权展开</h2></header>
+      <div class="values-grid">
+        <article class="value-card" data-qa-box><div class="value-index">01</div><h3 class="subhead">真实字体</h3><p class="body-copy">网络加载、浏览器检查，不再写一套用不上的字体愿望。</p></article>
+        <article class="value-card" data-qa-box><div class="value-index">02</div><h3 class="subhead">有限变体</h3><p class="body-copy">每类只保留经过验证的两到三种位置。</p></article>
+        <article class="value-card" data-qa-box><div class="value-index">03</div><h3 class="subhead">容量明确</h3><p class="body-copy">装不下就拆页，不缩成观众看不清的小字。</p></article>
+        <article class="value-card" data-qa-box><div class="value-index">04</div><h3 class="subhead">最终固定</h3><p class="body-copy">文章成品仍是完全确定的 1920 × 1080 坐标。</p></article>
+      </div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">10 / 24</div>
+    </section>
+
+    <!-- VALUES / TWO WIDE -->
+    <section class="slide" id="slide-11" data-layout="values-grid" data-variant="two-up-wide">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">VALUES / TWO-UP WIDE</div><h2 class="headline">项目少，文字就该更大</h2></header>
+      <div class="values-grid">
+        <article class="value-card" data-qa-box><div class="value-index">01</div><h3 class="subhead">规则固定</h3><p class="body-copy">字体、颜色、字号下限、留白范围、边框和页脚不随文章漂移。</p></article>
+        <article class="value-card" data-qa-box><div class="value-index">02</div><h3 class="subhead">位置受控</h3><p class="body-copy">内容只能选择批准的变体，不能临时向上挪十像素、向左挪二十像素。</p></article>
+      </div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">11 / 24</div>
+    </section>
+
+    <!-- TIMELINE / RISING -->
+    <section class="slide" id="slide-12" data-layout="timeline" data-variant="rising">
+      <div class="report-frame"></div><div class="header-rule"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">TIMELINE / RISING</div><h2 class="headline">折线用满证据区域</h2></header>
+      <div class="timeline-panel" data-qa-box>
+        <div class="timeline-label" style="left:0"><div class="step-no">01 · START</div><div class="chart-label">识别问题</div></div>
+        <div class="timeline-label" style="left:500px"><div class="step-no">02 · RULE</div><div class="chart-label">冻结合同</div></div>
+        <div class="timeline-label" style="left:1060px"><div class="step-no">03 · BUILD</div><div class="chart-label">实现变体</div></div>
+        <div class="timeline-label end" style="left:1728px"><div class="step-no">04 · VERIFY</div><div class="chart-label">浏览器验收</div></div>
+        <svg class="timeline-svg" viewBox="0 0 1728 410" aria-label="rising timeline"><path d="M 12 360 L 500 286 L 1060 176 L 1716 42" fill="none" stroke="#18E3D0" stroke-width="8"/><path d="M 12 360 H 1716" fill="none" stroke="rgba(231,233,231,.28)" stroke-width="2"/><g fill="#202324" stroke="#86EEE6" stroke-width="8"><circle cx="12" cy="360" r="16"/><circle cx="500" cy="286" r="16"/><circle cx="1060" cy="176" r="16"/><circle cx="1716" cy="42" r="16"/></g></svg>
+      </div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">12 / 24</div>
+    </section>
+
+    <!-- TIMELINE / FLAT -->
+    <section class="slide" id="slide-13" data-layout="timeline" data-variant="flat">
+      <div class="report-frame"></div><div class="header-rule"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">TIMELINE / FLAT</div><h2 class="headline">只有顺序，不伪造涨跌</h2></header>
+      <div class="timeline-panel" data-qa-box>
+        <div class="timeline-label" style="left:0"><div class="step-no">01 · INPUT</div><div class="chart-label">分析内容</div></div>
+        <div class="timeline-label" style="left:576px"><div class="step-no">02 · SELECT</div><div class="chart-label">选择变体</div></div>
+        <div class="timeline-label" style="left:1152px"><div class="step-no">03 · RESOLVE</div><div class="chart-label">换算坐标</div></div>
+        <div class="timeline-label end" style="left:1728px"><div class="step-no">04 · OUTPUT</div><div class="chart-label">固定页面</div></div>
+        <svg class="timeline-svg" viewBox="0 0 1728 410" aria-label="flat timeline"><path d="M 12 210 H 1716" fill="none" stroke="#18E3D0" stroke-width="8"/><g fill="#202324" stroke="#86EEE6" stroke-width="8"><circle cx="12" cy="210" r="16"/><circle cx="576" cy="210" r="16"/><circle cx="1152" cy="210" r="16"/><circle cx="1716" cy="210" r="16"/></g></svg>
+      </div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">13 / 24</div>
+    </section>
+
+    <!-- ARC / RISING -->
+    <section class="slide" id="slide-14" data-layout="revenue-arc" data-variant="rising">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">ARC / RISING</div><h2 class="headline">增长必须来自有序证据</h2></header>
+      <div class="arc-region" data-qa-box>
+        <svg class="arc-svg" viewBox="0 0 1728 570"><path d="M 40 500 C 380 500, 410 390, 720 360 S 1160 170, 1688 80" fill="none" stroke="#18E3D0" stroke-width="6"/><g fill="#202324" stroke="#86EEE6" stroke-width="7"><circle cx="120" cy="490" r="16"/><circle cx="620" cy="382" r="16"/><circle cx="1120" cy="228" r="16"/><circle cx="1600" cy="96" r="16"/></g></svg>
+        <div class="arc-label" style="left:70px;top:390px"><div class="chart-label">基础能力</div><p class="body-copy">先跑通</p></div>
+        <div class="arc-label" style="left:570px;top:280px"><div class="chart-label">稳定方案</div><p class="body-copy">再复用</p></div>
+        <div class="arc-label" style="left:1070px;top:125px"><div class="chart-label">视觉规则</div><p class="body-copy">可验证</p></div>
+        <div class="arc-label" style="left:1420px;top:0;text-align:right"><div class="chart-label">生产闭环</div><p class="body-copy">可交付</p></div>
+      </div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">14 / 24</div>
+    </section>
+
+    <!-- ARC / DESCENDING -->
+    <section class="slide" id="slide-15" data-layout="revenue-arc" data-variant="descending">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">ARC / DESCENDING</div><h2 class="headline">下降方向也必须有意义</h2></header>
+      <div class="arc-region" data-qa-box>
+        <svg class="arc-svg" viewBox="0 0 1728 570"><path d="M 40 70 C 420 110, 560 180, 820 270 S 1260 420, 1688 510" fill="none" stroke="#18E3D0" stroke-width="6"/><g fill="#202324" stroke="#86EEE6" stroke-width="7"><circle cx="120" cy="82" r="16"/><circle cx="620" cy="210" r="16"/><circle cx="1120" cy="370" r="16"/><circle cx="1600" cy="492" r="16"/></g></svg>
+        <div class="arc-label" style="left:70px;top:0"><div class="chart-label">临场改动</div><p class="body-copy">最耗时</p></div>
+        <div class="arc-label" style="left:570px;top:110px"><div class="chart-label">重复返工</div><p class="body-copy">逐步减少</p></div>
+        <div class="arc-label" style="left:1070px;top:270px"><div class="chart-label">规则复用</div><p class="body-copy">替代补丁</p></div>
+        <div class="arc-label" style="left:1420px;top:400px;text-align:right"><div class="chart-label">稳定交付</div><p class="body-copy">成为默认</p></div>
+      </div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">15 / 24</div>
+    </section>
+
+    <!-- METRIC / TWO -->
+    <section class="slide" id="slide-16" data-layout="metric" data-variant="two-up">
+      <div class="report-frame"></div><div class="header-rule"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">METRIC / TWO-UP</div><h2 class="headline">指标少，就把它做大</h2></header>
+      <div class="metric-grid"><article class="metric-card" data-qa-box><div><span class="metric">3</span><span class="metric-unit">LAYERS</span></div><div class="metric-label">稳定结构</div><div class="metric-note">全局合同、有限变体、最终像素</div><div class="tick-band"><i style="width:100%"></i></div></article><article class="metric-card" data-qa-box><div><span class="metric">24</span><span class="metric-unit">VIEWS</span></div><div class="metric-label">批准变体</div><div class="metric-note">每种位置都有明确用途和容量</div><div class="tick-band"><i style="width:82%"></i></div></article></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">16 / 24</div>
+    </section>
+
+    <!-- METRIC / THREE -->
+    <section class="slide" id="slide-17" data-layout="metric" data-variant="three-up">
+      <div class="report-frame"></div><div class="header-rule"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">METRIC / THREE-UP</div><h2 class="headline">三个角色，各有声音</h2></header>
+      <div class="metric-grid"><article class="metric-card" data-qa-box><div class="metric">01</div><div class="metric-label">标题字体</div><div class="metric-note">编辑感与识别度</div></article><article class="metric-card" data-qa-box><div class="metric">02</div><div class="metric-label">正文字体</div><div class="metric-note">长句阅读清楚</div></article><article class="metric-card" data-qa-box><div class="metric">03</div><div class="metric-label">标签字体</div><div class="metric-note">数字与结构有秩序</div></article></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">17 / 24</div>
+    </section>
+
+    <!-- METRIC / FIVE -->
+    <section class="slide" id="slide-18" data-layout="metric" data-variant="five-up">
+      <div class="report-frame"></div><div class="header-rule"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">METRIC / FIVE-UP</div><h2 class="headline">五项只承载短判断</h2></header>
+      <div class="metric-grid"><article class="metric-card" data-qa-box><div class="metric">01</div><div class="metric-label">字体</div><div class="metric-note">真实加载</div></article><article class="metric-card" data-qa-box><div class="metric">02</div><div class="metric-label">坐标</div><div class="metric-note">有限变体</div></article><article class="metric-card" data-qa-box><div class="metric">03</div><div class="metric-label">容量</div><div class="metric-note">超限拆页</div></article><article class="metric-card" data-qa-box><div class="metric">04</div><div class="metric-label">文案</div><div class="metric-note">保留原声</div></article><article class="metric-card" data-qa-box><div class="metric">05</div><div class="metric-label">验收</div><div class="metric-note">真实浏览器</div></article></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">18 / 24</div>
+    </section>
+
+    <!-- AUDIENCE / WIDE -->
+    <section class="slide" id="slide-19" data-layout="audience" data-variant="wide">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">AUDIENCE / WIDE</div><h2 class="headline">三个群体，共享边界</h2></header>
+      <div class="audience-region" data-qa-box><div class="audience-circle" style="left:180px"><div><div class="metric">42%</div><div class="chart-label">初学者</div></div></div><div class="audience-circle" style="left:654px"><div><div class="metric">36%</div><div class="chart-label">创作者</div></div></div><div class="audience-circle" style="left:1128px"><div><div class="metric">22%</div><div class="chart-label">开发者</div></div></div></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">19 / 24</div>
+    </section>
+
+    <!-- AUDIENCE / COMPACT -->
+    <section class="slide" id="slide-20" data-layout="audience" data-variant="compact">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">AUDIENCE / COMPACT</div><h2 class="headline">五项比例，保持同一中心线</h2></header>
+      <div class="audience-region" data-qa-box><div class="audience-circle" style="left:20px"><div><div class="metric">28</div><div class="chart-label">A</div></div></div><div class="audience-circle" style="left:360px"><div><div class="metric">24</div><div class="chart-label">B</div></div></div><div class="audience-circle" style="left:700px"><div><div class="metric">20</div><div class="chart-label">C</div></div></div><div class="audience-circle" style="left:1040px"><div><div class="metric">16</div><div class="chart-label">D</div></div></div><div class="audience-circle" style="left:1380px"><div><div class="metric">12</div><div class="chart-label">E</div></div></div></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">20 / 24</div>
+    </section>
+
+    <!-- MAP / LEFT -->
+    <section class="slide" id="slide-21" data-layout="map" data-variant="map-left">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">MAP / LEFT</div><h2 class="headline">地图是证据，不是装饰</h2></header>
+      <div class="map-slot" data-qa-box><div class="slot-note">替换为真实地图 / 地理数据<br>MAP EVIDENCE</div></div><div class="map-metric" data-qa-box><div><span class="metric-hero">18</span><span class="metric-unit">REGIONS</span></div><div class="metric-label">证据在左，结论在右</div></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">21 / 24</div>
+    </section>
+
+    <!-- MAP / RIGHT -->
+    <section class="slide" id="slide-22" data-layout="map" data-variant="map-right">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">MAP / RIGHT</div><h2 class="headline">先读数字，再看分布</h2></header>
+      <div class="map-metric" data-qa-box><div><span class="metric-hero">64</span><span class="metric-unit">%</span></div><div class="metric-label">核心区域贡献</div></div><div class="map-slot" data-qa-box><div class="slot-note">真实地图 / 网点分布<br>MAP RIGHT</div></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">22 / 24</div>
+    </section>
+
+    <!-- ROADMAP / OVERLAP FOUR -->
+    <section class="slide" id="slide-23" data-layout="roadmap" data-variant="overlap-four">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">ROADMAP / OVERLAP-FOUR</div><h2 class="headline">四个方向，彼此有交集</h2></header>
+      <div class="roadmap-region" data-qa-box><div class="road-circle" style="left:66px"><div class="road-copy"><div class="road-step">01</div><h3 class="subhead">字体</h3><p class="body-copy">真实可用</p></div></div><div class="road-circle" style="left:426px"><div class="road-copy"><div class="road-step">02</div><h3 class="subhead">版式</h3><p class="body-copy">有限选择</p></div></div><div class="road-circle" style="left:786px"><div class="road-copy"><div class="road-step">03</div><h3 class="subhead">文案</h3><p class="body-copy">保留原声</p></div></div><div class="road-circle" style="left:1146px"><div class="road-copy"><div class="road-step">04</div><h3 class="subhead">验收</h3><p class="body-copy">浏览器证据</p></div></div></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">23 / 24</div>
+    </section>
+
+    <!-- ROADMAP / SEQUENCE THREE -->
+    <section class="slide" id="slide-24" data-layout="roadmap" data-variant="sequence-three">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">ROADMAP / SEQUENCE-THREE</div><h2 class="headline">三步完成一次稳定生成</h2></header>
+      <div class="roadmap-region" data-qa-box><div class="road-circle" style="left:80px"><div class="road-copy"><div class="road-step">STEP 01</div><h3 class="subhead">分析</h3><p class="body-copy">提取内容特征</p></div></div><div class="road-circle" style="left:649px"><div class="road-copy"><div class="road-step">STEP 02</div><h3 class="subhead">选择</h3><p class="body-copy">匹配批准变体</p></div></div><div class="road-circle" style="left:1218px"><div class="road-copy"><div class="road-step">STEP 03</div><h3 class="subhead">固定</h3><p class="body-copy">输出像素坐标</p></div></div></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">24 / 24</div>
+    </section>
+
+    <!-- HERO / DUAL SIGNAL — PRESERVED FROM THE ORIGINAL PPT-DERIVED DECK -->
+    <section class="slide wash-right" id="slide-25" data-layout="hero" data-variant="dual-signal">
+      <div class="hero-logo">DARK TEAL / PRESERVED</div><div class="hero-date">2026 · 08</div>
+      <div class="dual-signal-copy" data-qa-box><div class="section-label">OPENING / DUAL SIGNAL</div><h2 class="hero-title">先确认两件事，<br>再决定往哪走。</h2><p class="lead" style="margin-top:42px">适合用一组强烈反差，快速建立整篇内容的问题意识。</p></div>
+      <div class="dual-signal-board" data-qa-box><div class="signal-row"><div class="signal-value" data-qa-glyph>1→10</div><div data-qa-glyph-peer><div class="signal-label">执行放大</div><div class="signal-note">已知方向，快速扩大结果。</div></div></div><div class="signal-row"><div class="signal-value" data-qa-glyph>0→0</div><div data-qa-glyph-peer><div class="signal-label">判断缺失</div><div class="signal-note">方向错误，速度不会创造需求。</div></div></div></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">25 / 30</div>
+    </section>
+
+    <!-- EDITORIAL / STATEMENT MARK — GIANT AI GLYPH -->
+    <section class="slide" id="slide-26" data-layout="editorial" data-variant="statement-mark">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">EDITORIAL / STATEMENT-MARK</div><h2 class="headline">观点需要一个能被记住的视觉锚点</h2></header>
+      <div class="statement-mark-region" data-qa-box><div class="statement-copy"><div class="statement-quote">“只要做得足够多，不等于总会出现真正的需求。”</div><div class="statement-note">左侧承载核心判断和证据，右侧使用一个与主题直接相关的超大文字标识；不是放一块空卡片。</div></div><div class="statement-mark">AI</div></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">26 / 30</div>
+    </section>
+
+    <!-- METRIC / SEQUENCE FOUR — FOUR KPI COLUMNS WITH BARS -->
+    <section class="slide" id="slide-27" data-layout="metric" data-variant="sequence-four">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">METRIC / SEQUENCE-FOUR</div><h2 class="headline">四个阶段，结果逐步被放大</h2></header>
+      <div class="sequence-four-grid" data-qa-box><article class="sequence-card"><div class="sequence-number">01</div><h3 class="sequence-title">投入预算</h3><div class="sequence-bar"><i style="width:28%"></i></div><p class="sequence-note">先把人带进来</p></article><article class="sequence-card"><div class="sequence-number">02</div><h3 class="sequence-title">短期进量</h3><div class="sequence-bar"><i style="width:46%"></i></div><p class="sequence-note">看起来已有用户</p></article><article class="sequence-card"><div class="sequence-number">03</div><h3 class="sequence-title">低活跃</h3><div class="sequence-bar"><i style="width:62%"></i></div><p class="sequence-note">需求没有被满足</p></article><article class="sequence-card"><div class="sequence-number">04</div><h3 class="sequence-title">损失扩大</h3><div class="sequence-bar"><i style="width:100%"></i></div><p class="sequence-note">获客越多，浪费越多</p></article></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">27 / 30</div>
+    </section>
+
+    <!-- COMPARE / CAPABILITY BOUNDARY — CHECK VS QUESTION -->
+    <section class="slide" id="slide-28" data-layout="compare" data-variant="capability-boundary">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">COMPARE / CAPABILITY-BOUNDARY</div><h2 class="headline">能执行，不等于能替你判断</h2></header>
+      <div class="capability-boundary" data-qa-box><article class="capability-side"><div class="capability-mark">✓</div><h3 class="capability-title">代码生成</h3><p class="capability-copy">把明确的想法、功能和页面，快速变成可以运行的产品。</p><p class="capability-caption">擅长：执行已知方案。</p></article><article class="capability-side"><div class="capability-mark">?</div><h3 class="capability-title">需求判断</h3><p class="capability-copy">这个功能有没有人需要？需求强度是否足以支撑产品？</p><p class="capability-caption">边界：答案必须回到真实用户。</p></article></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">28 / 30</div>
+    </section>
+
+    <!-- EDITORIAL / EVIDENCE STACK — STACK PLUS ARROW -->
+    <section class="slide" id="slide-29" data-layout="editorial" data-variant="evidence-stack">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">EDITORIAL / EVIDENCE-STACK</div><h2 class="headline">把多个证据压成一个明确判断</h2></header>
+      <div class="evidence-stack-region" data-qa-box><div class="evidence-index">03</div><div class="evidence-stack"><div class="evidence-stack-item">重复反馈</div><div class="evidence-stack-item">使用记录</div><div class="evidence-stack-item">付费意愿</div></div><div class="evidence-arrow">→</div><div class="evidence-explanation"><h3 class="subhead">不是堆素材，<br>而是形成证据链。</h3><p class="component-copy">左边逐条列出具体证据，右边只保留最终结论，让空间承担信息层级。</p></div></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">29 / 30</div>
+    </section>
+
+    <!-- METRIC / EVIDENCE HERO — ONE LARGE SIGNAL PLUS EXPLANATION -->
+    <section class="slide" id="slide-30" data-layout="metric" data-variant="evidence-hero">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">METRIC / EVIDENCE-HERO</div><h2 class="headline">一个大数字，要带出一条证据</h2></header>
+      <div class="evidence-hero-region" data-qa-box><div><div class="evidence-hero-metric">64%</div><div class="evidence-hero-label">真实用户主动回来</div></div><div class="evidence-hero-copy"><h3 class="subhead">先看行为，<br>再下判断。</h3><p class="component-copy">大数字负责抓住注意力，右侧说明它意味着什么；不能只把数字放大后留下半页空白。</p></div></div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">30 / 30</div>
+    </section>
+  </main>
+</div>
+<div class="deck-counter" id="deckCounter">01 / 30</div>
+
+<script>
+  /* === FIXED-STAGE NAVIGATION AND QA API === */
+  class DarkTealDeck {
+    constructor() {
+      this.stage = document.getElementById('deckStage');
+      this.slides = [...document.querySelectorAll('.slide')];
+      this.counter = document.getElementById('deckCounter');
+      this.slides.forEach((slide, index) => {
+        const footer = slide.querySelector('.footer-page');
+        if (footer) footer.textContent = `${String(index + 1).padStart(2, '0')} / ${this.slides.length}`;
+      });
+      this.current = this.indexFromHash();
+      this.scale();
+      this.show(this.current, false);
+      window.addEventListener('resize', () => this.scale());
+      window.addEventListener('hashchange', () => this.show(this.indexFromHash(), false));
+      document.addEventListener('keydown', (event) => {
+        if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(event.key)) this.show(this.current + 1);
+        if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) this.show(this.current - 1);
+        if (event.key === 'Home') this.show(0);
+        if (event.key === 'End') this.show(this.slides.length - 1);
+      });
+      document.addEventListener('click', (event) => {
+        if (event.button !== 0 || window.getSelection()?.toString()) return;
+        if (event.target.closest('a, button, input, textarea, select')) return;
+        this.show(this.current + (event.clientX < window.innerWidth / 2 ? -1 : 1));
+      });
+    }
+
+    indexFromHash() {
+      const match = location.hash.match(/slide-(\d+)/);
+      return match ? Math.max(0, Math.min(Number(match[1]) - 1, this.slides.length - 1)) : 0;
+    }
+
+    scale() {
+      const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      const x = (window.innerWidth - 1920 * factor) / 2;
+      const y = (window.innerHeight - 1080 * factor) / 2;
+      this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+    }
+
+    show(index, writeHash = true) {
+      this.current = Math.max(0, Math.min(index, this.slides.length - 1));
+      this.slides.forEach((slide, i) => slide.classList.toggle('active', i === this.current));
+      this.counter.textContent = `${String(this.current + 1).padStart(2, '0')} / ${this.slides.length}`;
+      if (writeHash) history.replaceState(null, '', `#slide-${this.current + 1}`);
+    }
+  }
+
+  window.darkTealDeck = new DarkTealDeck();
+
+  window.runDarkTealQA = async () => {
+    await document.fonts.ready;
+    const fontChecks = {
+      manropeLocal: document.fonts.check('700 140px "Manrope Local"', '✓?10'),
+      smileySansLocal: document.fonts.check('700 76px "Smiley Sans Local"', '中文'),
+      ibmPlexSansSCRegular: document.fonts.check('400 40px "IBM Plex Sans SC Local"', '中文'),
+      ibmPlexSansSCMedium: document.fonts.check('500 48px "IBM Plex Sans SC Local"', '中文'),
+      ibmPlexMono: document.fonts.check('500 22px "IBM Plex Mono"', '2026'),
+    };
+    const stageRect = document.getElementById('deckStage').getBoundingClientRect();
+    const scale = stageRect.width / 1920;
+    const boxes = [...document.querySelectorAll('[data-qa-box]')].map((element) => {
+      const rect = element.getBoundingClientRect();
+      const local = {
+        left: (rect.left - stageRect.left) / scale,
+        top: (rect.top - stageRect.top) / scale,
+        right: (rect.right - stageRect.left) / scale,
+        bottom: (rect.bottom - stageRect.top) / scale,
+      };
+      return {
+        slide: element.closest('.slide')?.id ?? '',
+        overflowX: element.scrollWidth > element.clientWidth + 1,
+        overflowY: element.scrollHeight > element.clientHeight + 1,
+        insideStage: local.left >= -1 && local.top >= -1 && local.right <= 1921 && local.bottom <= 1081,
+      };
+    });
+    const glyphs = [...document.querySelectorAll('[data-qa-glyph]')].map((element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const glyphRect = range.getBoundingClientRect();
+      const peer = element.parentElement.querySelector('[data-qa-glyph-peer]');
+      const peerRect = peer?.getBoundingClientRect();
+      return {
+        slide: element.closest('.slide')?.id ?? '',
+        text: element.textContent.trim(),
+        overflowX: element.scrollWidth > element.clientWidth + 1,
+        overlapsPeer: Boolean(peerRect && glyphRect.right > peerRect.left + 1 && glyphRect.bottom > peerRect.top + 1 && glyphRect.top < peerRect.bottom - 1),
+      };
+    });
+    return { fontChecks, boxes, glyphs };
+  };
+</script>
+</body>
+</html>
