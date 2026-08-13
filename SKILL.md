@@ -12,25 +12,38 @@ Create speaker-led 1920 x 1080 HTML slides from a complete article or narration 
 ## Workflow
 
 1. Run `node scripts/doctor.mjs --json`. Stop only when Node or browser-based HTML QA is unavailable.
-2. Create a job with `node scripts/create-job.mjs <job-name> [output-root]` and save the complete source as `source.md`.
-3. Read [references/design-system.md](references/design-system.md), then [references/template-selection.md](references/template-selection.md). Choose one template for the whole deck.
-4. Read only the selected template's `design.md` and `template.html` under `assets/templates/`. The bundled file is a visual catalog: copy approved slide sections into the job, add a unique scene id, and put the complete matching source passage in `aria-label`. Replace content; do not invent a new geometry, font system, card family, or page-specific coordinates.
-5. Keep source narration and visible copy separate. Condense visible copy without changing facts. If content exceeds a layout's capacity, split the scene or select another approved layout. Run `node scripts/validate-slides.mjs <job>/slides.html` and fix every error before delivery.
-6. Report the generated `slides.html` path and the selected template. Any audio, subtitle, or video work happens later in a separate tool or workflow and is not performed by this Skill.
+2. Read [references/design-system.md](references/design-system.md), then [references/template-selection.md](references/template-selection.md). Choose one template for the whole deck.
+3. Create the job with `node scripts/create-job.mjs <template-id> <job-name> [output-root]`. This creates `jobs/<template-id>/<job-name>/manifest.json`; save the complete source beside it as `source.md`.
+4. Read only the selected template's `design.md` and `template.html` under `assets/templates/`. Do not inspect a historical job or previously generated deck as an answer unless the user explicitly asks to reuse it.
+5. Before writing HTML, create `layout-plan.json` using [references/layout-plan.md](references/layout-plan.md). Record every scene's complete narration, semantic role, item count, approved layout/variant, and selection reason. Run `node scripts/validate-layout-plan.mjs <job>/source.md <job>/layout-plan.json`. Do not write `slides.html` until it passes.
+6. Copy the planned approved slide sections into `slides.html`, preserving geometry and adding the planned scene id and complete narration in `aria-label`. Preserve the selected template's complete presentation shell: fixed-stage scaling, visible previous/next controls, keyboard/click/wheel/touch navigation, page counter, and local font assets. Keep narration and visible copy separate. Split content instead of shrinking or inventing geometry.
+7. Run `node scripts/validate-slides.mjs <job>/slides.html --plan <job>/layout-plan.json` and fix every error before delivery. Report `layout-plan.json`, `slides.html`, the selected template, and the layout distribution.
 
 ## Non-Negotiable Rules
 
-- Keep the source article and generated HTML traceable inside one job directory.
+- Keep the source article and generated HTML traceable inside one job directory at `jobs/<template-id>/<job-name>/`.
+- Never encode a machine-specific project root in the job contract. `manifest.json` stores template and job ids plus paths relative to its own directory, so another user can move the repository without editing the manifest.
+- Never skip or backfill `layout-plan.json` after HTML generation.
+- Never turn a long deck into repeated subtitle/title pages. Three identical layouts in sequence, excessive hero/title pages, or insufficient layout diversity are validation failures.
+- When narration explicitly contains comparison, parallel items, ordered steps, metrics, evidence, or named tools, use the matching structural family recorded in the plan.
+- In B, exactly four comparable ideas, examples, components, or decisions use `values-grid / four-up`. A timeline is only for a real chronological or causal sequence; visual variety is not a reason to turn four peers into a line chart.
+- Treat `01/02/03` as ordering metadata, never as a metric. Use a metric family only for a real value, ratio, percentage, amount, KPI, or measured quantity.
+- Do not use adjacent `hero / lower-left` pages. Put multi-point summaries in a structural layout and reserve the sparse hero for one short final statement or CTA.
+- A final sparse hero carries one short action only. Use `hero / center` for a short CTA; reserve `hero / lower-left` for a stronger reveal or closing statement that intentionally needs grounded editorial weight. If the source asks for both engagement and questions/comments, choose the primary action for visible copy or use a structural layout.
+- Fill every reserved evidence zone with source meaning. A B dual-signal board needs concrete examples or a short process in both rows; an overlap roadmap keeps small `01–04` ordinals plus one supporting phrase per circle; a closing three-up grid gives every card both an explanation and a distinct result/consequence line.
 - Keep each slide to one primary claim and at most three information levels.
 - Keep spoken explanatory copy at least 48px and card/list supporting copy at least 36px on the 1920 x 1080 stage.
+- Timeline endpoint labels must use the template's approved endpoint alignment class so the last item remains inside the stage. Never repair clipping by nudging a label beyond its approved geometry.
 - Do not use hidden overflow or smaller text to conceal capacity failures.
 - Do not copy demo wording from the bundled templates into the user's output.
 - Do not add dashboard grids, arbitrary decorative cards, random colors, or unsupported page families.
 - Do not write machine-specific absolute paths into generated artifacts.
+- A multi-page `slides.html` must be directly reviewable: visible previous/next buttons must work, keyboard navigation must work, and local fonts must load without failed requests. Passing a static layout check is not enough.
 
 ## Resources
 
 - [references/job-contract.md](references/job-contract.md): required HTML job files and invariants.
+- [references/layout-plan.md](references/layout-plan.md): mandatory pre-HTML semantic planning contract and gates.
 - [references/design-system.md](references/design-system.md): shared content and visual rules.
 - [references/template-selection.md](references/template-selection.md): A/B and page-type selection.
 - [references/dependencies.md](references/dependencies.md): Node and browser requirements for HTML QA.

@@ -12,6 +12,6 @@
   </style>
 </head>
 <body><main class="deck-stage">
-  <section id="scene-01" class="slide" aria-label="先看事实，再看结论。"><h1 class="title reveal">先看事实</h1><p class="sub reveal">再看结论</p></section>
-  <section id="scene-02" class="slide" aria-label="事实回答发生了什么，结论回答我们应该怎么做。"><h2 class="title reveal">事实与结论</h2><p class="sub reveal">发生了什么 / 应该怎么做</p></section>
-</main></body></html>
+  <section id="scene-01" class="slide" data-template-type="cover" aria-label="先看事实，再看结论。"><h1 class="title reveal">先看事实</h1><p class="sub reveal">再看结论</p></section>
+  <section id="scene-02" class="slide" data-template-type="core-idea" aria-label="事实回答发生了什么，结论回答我们应该怎么做。"><h2 class="title reveal">事实与结论</h2><p class="sub reveal">发生了什么 / 应该怎么做</p></section>
+</main><nav aria-label="幻灯片翻页"><button id="prev" type="button">上一页</button><button id="next" type="button">下一页</button></nav><script>const slides=[...document.querySelectorAll('.slide')];let index=0;document.getElementById('prev').onclick=()=>show(index-1);document.getElementById('next').onclick=()=>show(index+1);function show(next){index=Math.max(0,Math.min(next,slides.length-1));slides.forEach((slide,i)=>slide.classList.toggle('active',i===index));}</script></body></html>

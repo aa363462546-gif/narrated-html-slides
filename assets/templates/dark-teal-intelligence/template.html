@@ -159,8 +159,10 @@
     .hero-evidence .meta { margin-bottom: 20px; }
     .slide[data-layout="hero"][data-variant="center"] .hero-copy { left: 240px; top: 236px; width: 1440px; height: 610px; text-align: center; align-items: center; }
     .slide[data-layout="hero"][data-variant="center"] .hero-title { width: 1380px; }
+    .slide[data-layout="hero"][data-variant="center"] .hero-title { font-size: 118px; }
     .slide[data-layout="hero"][data-variant="lower-left"] .hero-copy { left: 96px; top: 450px; width: 1420px; height: 430px; }
     .slide[data-layout="hero"][data-variant="lower-left"] .hero-title { width: 1380px; }
+    .slide[data-layout="hero"][data-variant="lower-left"] .hero-title { font-size: 118px; }
     .slide[data-layout="hero"][data-variant="split-visual"] .hero-copy { left: 96px; top: 220px; width: 820px; height: 650px; }
     .slide[data-layout="hero"][data-variant="split-visual"] .hero-title { width: 820px; }
     .slide[data-layout="hero"][data-variant="split-visual"] .hero-evidence { left: 1040px; top: 160px; width: 720px; height: 720px; }
@@ -216,6 +218,7 @@
     .value-index { font: 600 22px/1 var(--font-mono); color: var(--aqua); }
     .value-card .subhead { margin-top: 30px; }
     .value-card .body-copy { margin-top: 20px; }
+    .value-result { margin-top: 34px; padding-top: 24px; border-top: 1px solid var(--line-strong); font: 500 34px/1.34 var(--font-body); color: var(--aqua-soft); }
     .slide[data-layout="values-grid"][data-variant="four-up"] .values-grid { top: 330px; height: 598px; grid-template-columns: 848px 848px; grid-template-rows: 283px 283px; gap: 32px; }
     .slide[data-layout="values-grid"][data-variant="four-up"] .value-card { padding: 22px 40px; }
     .slide[data-layout="values-grid"][data-variant="four-up"] .value-card .subhead { margin-top: 16px; }
@@ -224,6 +227,10 @@
     .slide[data-layout="values-grid"][data-variant="two-up-wide"] .value-card { display: grid; grid-template-columns: 120px 480px 1fr; gap: 40px; align-items: center; }
     .slide[data-layout="values-grid"][data-variant="two-up-wide"] .value-card .subhead,
     .slide[data-layout="values-grid"][data-variant="two-up-wide"] .value-card .body-copy { margin-top: 0; }
+    .slide[data-layout="values-grid"][data-variant="three-up"] .values-grid { top: 350px; height: 540px; grid-template-columns: repeat(3, 554px); gap: 32px; }
+    .slide[data-layout="values-grid"][data-variant="three-up"] .value-card { padding: 46px 42px; display: flex; flex-direction: column; justify-content: center; border-top: 3px solid var(--aqua); }
+    .slide[data-layout="values-grid"][data-variant="three-up"] .value-card .subhead { margin-top: 32px; font-size: 52px; }
+    .slide[data-layout="values-grid"][data-variant="three-up"] .value-card .body-copy { margin-top: 28px; font-size: 38px; line-height: 1.34; }
 
     /* === TIMELINE: FULL EVIDENCE ZONE === */
     .timeline-panel { position: absolute; left: 96px; top: 340px; width: 1728px; height: 560px; }
@@ -294,6 +301,7 @@
     .dual-signal-board { position: absolute; left: 1050px; top: 178px; width: 720px; height: 720px; display: grid; grid-template-rows: 1fr 1fr; border: 1px solid var(--line-strong); }
     .dual-signal-copy { position: absolute; left: 96px; top: 250px; width: 820px; height: 580px; display: flex; flex-direction: column; justify-content: center; }
     .dual-signal-copy .hero-title { font-size: 88px; }
+    .dual-signal-copy .lead { font-size: 56px; line-height: 1.28; }
     .signal-row { padding: 54px 30px; display: grid; grid-template-columns: 310px 1fr; column-gap: 20px; align-items: center; }
     .signal-row + .signal-row { border-top: 1px solid var(--line-strong); }
     .signal-value { font: 700 112px/.9 var(--font-latin); color: var(--aqua); letter-spacing: -.04em; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -341,14 +349,17 @@
     .evidence-hero-copy .component-copy { margin-top: 36px; max-width: 880px; }
 
     /* === NAVIGATION === */
-    .deck-counter { position: fixed; right: 22px; bottom: 18px; z-index: 20; font: 500 13px/1 var(--font-mono); color: rgba(255,255,255,.54); }
+    .deck-controls { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 12px; padding: 8px; background: rgba(23,25,26,.88); border: 1px solid var(--line-strong); }
+    .deck-controls button { width: 48px; height: 48px; padding: 0; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); font: 500 26px/1 var(--font-display); cursor: pointer; }
+    .deck-controls button:hover { border-color: var(--aqua); color: var(--aqua); }
+    .deck-counter { min-width: 84px; text-align: center; font: 500 16px/1 var(--font-mono); color: var(--ink-secondary); }
 
     @media print {
       html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
       .deck-viewport { position: static; overflow: visible; }
       .deck-stage { position: static; width: auto; height: auto; transform: none !important; }
       .slide { position: relative; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; break-after: page; }
-      .deck-counter { display: none; }
+      .deck-controls { display: none; }
     }
   </style>
 </head>
@@ -635,9 +646,25 @@
       <div class="evidence-hero-region" data-qa-box><div><div class="evidence-hero-metric">64%</div><div class="evidence-hero-label">真实用户主动回来</div></div><div class="evidence-hero-copy"><h3 class="subhead">先看行为，<br>再下判断。</h3><p class="component-copy">大数字负责抓住注意力，右侧说明它意味着什么；不能只把数字放大后留下半页空白。</p></div></div>
       <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">30 / 30</div>
     </section>
+
+    <!-- VALUES / THREE UP — ORDER IS SECONDARY, MEANING IS PRIMARY -->
+    <section class="slide" id="slide-31" data-layout="values-grid" data-variant="three-up">
+      <div class="report-frame"></div><div class="footer-rule"></div>
+      <header class="page-head" data-qa-box><div class="section-label">VALUES / THREE-UP</div><h2 class="headline">三个概念，先读含义</h2></header>
+      <div class="values-grid">
+        <article class="value-card" data-qa-box><div class="value-index">01 / VOICE</div><h3 class="subhead">人声配音</h3><p class="body-copy">承载叙事、语气和主要信息。</p><p class="value-result">结果：观众能听清主线</p></article>
+        <article class="value-card" data-qa-box><div class="value-index">02 / MUSIC</div><h3 class="subhead">背景音乐</h3><p class="body-copy">建立情绪，但不能压过人声。</p><p class="value-result">结果：情绪保持一致</p></article>
+        <article class="value-card" data-qa-box><div class="value-index">03 / EFFECT</div><h3 class="subhead">关键音效</h3><p class="body-copy">只在重点和转折处提供提示。</p><p class="value-result">结果：重点更容易被记住</p></article>
+      </div>
+      <div class="footer-logo">DARK TEAL INTELLIGENCE</div><div class="footer-year">2026</div><div class="footer-page">31 / 31</div>
+    </section>
   </main>
 </div>
-<div class="deck-counter" id="deckCounter">01 / 30</div>
+<nav class="deck-controls" aria-label="幻灯片翻页">
+  <button id="deckPrev" type="button" aria-label="上一页">←</button>
+  <div class="deck-counter" id="deckCounter">01 / 31</div>
+  <button id="deckNext" type="button" aria-label="下一页">→</button>
+</nav>
 
 <script>
   /* === FIXED-STAGE NAVIGATION AND QA API === */
@@ -651,6 +678,9 @@
         if (footer) footer.textContent = `${String(index + 1).padStart(2, '0')} / ${this.slides.length}`;
       });
       this.current = this.indexFromHash();
+      this.prev = document.getElementById('deckPrev');
+      this.next = document.getElementById('deckNext');
+      this.ignoreClickUntil = 0;
       this.scale();
       this.show(this.current, false);
       window.addEventListener('resize', () => this.scale());
@@ -662,10 +692,29 @@
         if (event.key === 'End') this.show(this.slides.length - 1);
       });
       document.addEventListener('click', (event) => {
+        if (Date.now() < this.ignoreClickUntil) return;
         if (event.button !== 0 || window.getSelection()?.toString()) return;
         if (event.target.closest('a, button, input, textarea, select')) return;
         this.show(this.current + (event.clientX < window.innerWidth / 2 ? -1 : 1));
       });
+      this.prev.addEventListener('click', () => this.show(this.current - 1));
+      this.next.addEventListener('click', () => this.show(this.current + 1));
+      let wheelLocked = false;
+      window.addEventListener('wheel', (event) => {
+        if (wheelLocked || Math.abs(event.deltaY) < 8) return;
+        wheelLocked = true;
+        this.show(this.current + (event.deltaY > 0 ? 1 : -1));
+        window.setTimeout(() => { wheelLocked = false; }, 500);
+      }, { passive: true });
+      let touchX = 0;
+      window.addEventListener('touchstart', (event) => { touchX = event.changedTouches[0].clientX; }, { passive: true });
+      window.addEventListener('touchend', (event) => {
+        const delta = event.changedTouches[0].clientX - touchX;
+        if (Math.abs(delta) > 45) {
+          this.ignoreClickUntil = Date.now() + 700;
+          this.show(this.current + (delta < 0 ? 1 : -1));
+        }
+      }, { passive: true });
     }
 
     indexFromHash() {

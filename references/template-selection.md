@@ -39,8 +39,8 @@ Do not mix A and B inside one deck.
 - `editorial`: claim plus evidence, quote, stack, or memorable mark.
 - `split-proof`: text and one real evidence object, image left or right.
 - `portrait`: one featured subject and supporting facts.
-- `values-grid`: two or four value statements.
-- `timeline`: ordered stages with rising or flat progression.
+- `values-grid`: two, three, or four peer value statements; exactly four peer items use `four-up`.
+- `timeline`: genuinely ordered or causal stages with rising or flat progression; never an unordered four-item list.
 - `revenue-arc`: increasing or decreasing quantitative trajectory.
 - `metric`: two, three, five, sequence-four, or evidence-hero metrics.
 - `audience`: wide or compact audience segmentation.

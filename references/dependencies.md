@@ -6,6 +6,7 @@ Run `node scripts/doctor.mjs --json` before generating or checking HTML.
 
 - Node.js 22 or newer.
 - A Chromium-family browser for rendered QA.
+- `puppeteer-core`, resolved first from this Skill and then from the current project. A generated deck does not pass rendered QA when the browser driver is unavailable.
 - Network access when a template loads remote fonts. For offline use, the bundled font assets and template-local `@font-face` declarations should be preferred.
 
 No audio engine, subtitle parser, video renderer, or external media CLI is required by this Skill. Those tools may be installed and used by a separate downstream workflow.

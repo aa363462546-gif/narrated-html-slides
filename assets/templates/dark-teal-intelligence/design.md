@@ -42,6 +42,7 @@ Every page family has only the named variants in this document. The Agent select
 - Strong judgment plus one memorable subject glyph → statement-mark editorial.
 - A capability and its boundary → capability-boundary compare.
 - Item count determines approved grid/metric variants.
+- Three unordered named concepts → three-up values grid; its small index is metadata and its semantic title is the focus.
 - Ordered change determines rising/flat/descending path variants.
 
 ### 第三层：最终固定像素
@@ -135,7 +136,7 @@ Chinese display text uses Smiley Sans Local with restrained negative tracking (`
 - `hero / center`: copy `x=240, y=236, w=1440, h=610`; use for a short title whose visual center should be the page center.
 - `hero / lower-left`: copy `x=96, y=450, w=1420, h=430`; use for a reveal, closing phrase, or statement that benefits from grounded lower-left weight.
 - `hero / split-visual`: copy `x=96, y=220, w=820, h=650`; evidence field `x=1040, y=160, w=720, h=720`; use only when a real visual, diagram, or supplied evidence exists.
-- `hero / dual-signal`: copy `x=96, y=250, w=820, h=580`; two-signal board `x=1050, y=178, w=720, h=720`; use at an opening when two opposed outcomes establish the problem immediately.
+- `hero / dual-signal`: copy `x=96, y=250, w=820, h=580`; two-signal board `x=1050, y=178, w=720, h=720`; use at an opening when two opposed outcomes establish the problem immediately. Each signal must include one concrete example, noun group, or short process from the source; a generic label plus a generic note is too sparse for this board.
 
 Hero capacity is one label plus one title. No subtitle list or card row.
 
@@ -164,6 +165,7 @@ Use featured-left only when the two subjects are not equal in narrative importan
 
 ### Values Grid
 
+- `values-grid / three-up`: three equal semantic cards at `x=96, y=350, w=1728, h=540`. Use for three named concepts, components, tools, or summary pillars. The `22px` index is subordinate; the `52px` semantic title is primary. On a closing/summary page, every card also needs a distinct consequence or result line; three short one-sentence cards leave the approved box visually empty.
 - `values-grid / four-up`: `2 × 2` grid at `x=96, y=330, w=1728, h=598`, `32px` gaps.
 - `values-grid / two-up-wide`: two horizontal rows at `x=96, y=350, w=1728, h=540`, `28px` gap.
 
@@ -184,6 +186,8 @@ Both use `x=96, y=340, w=1728, h=560`. Labels are `32px`; step/date metadata is 
 The direction must come from supplied meaning. Never imply improvement or decline from an unordered list.
 
 ### Metric
+
+Metric variants require a real value, ratio, percentage, amount, KPI, or measured quantity. Plain `01/02/03` ordering is never a metric and must use a semantic values, timeline, or roadmap family instead.
 
 - `metric / two-up`: exactly two large metrics; each receives `848px` width.
 - `metric / three-up`: exactly three metrics; each receives `554px` width.
@@ -215,7 +219,7 @@ The map slot accepts only a supplied map or real geographic evidence. A neutral 
 
 ### Roadmap
 
-- `roadmap / overlap-four`: four `360px` circles with `72px` overlap; use when the directions share responsibility.
+- `roadmap / overlap-four`: four `360px` circles with `72px` overlap; use when the directions share responsibility. Keep a small `01–04` ordinal and one short supporting phrase in each circle so related directions still have a readable sequence and use the available depth; the semantic title remains larger than the ordinal.
 - `roadmap / sequence-three`: three `430px` circles connected by one baseline; use when stages are ordered and mostly distinct.
 
 No fifth circle. Text must remain inside its assigned circle.
@@ -224,12 +228,16 @@ No fifth circle. Text must remain inside its assigned circle.
 
 Before selecting a variant, record: title length, item count, ordered/unordered relation, evidence type, desired visual anchor, and whether the page contains an explicit contrast or capability boundary. Select the smallest approved variant that expresses those facts.
 
-The mother template contains **30 approved examples**. Pages `25–30` preserve the distinctive components reverse-engineered from the original 12-page PPT-derived deck: dual signal, giant subject glyph, four-step KPI bars, check/question boundary, evidence stack, and large evidence metric. New articles reuse their structure only; they must never copy the demonstration prose.
+The mother template contains **31 approved examples**. Page `31` is the semantic three-up values layout. Pages `25–30` preserve the distinctive components reverse-engineered from the original 12-page PPT-derived deck: dual signal, giant subject glyph, four-step KPI bars, check/question boundary, evidence stack, and large evidence metric. New articles reuse their structure only; they must never copy the demonstration prose.
 
 Space allocation is semantic, not decorative:
 
 - If the selected family reserves a right evidence zone, fill it with a real component from the source meaning. Do not leave an empty half-screen or a tiny card floating in it.
 - For 2–4 parallel items, use the full approved row/grid and distribute items evenly across the available width.
+- Exactly four peer ideas, examples, components, or decisions use `values-grid / four-up`. A timeline is reserved for real chronological or causal order; do not imply progression for an unordered set.
+- A numbered list is not a metric. Keep ordering labels visually below the semantic title unless the number itself is measured evidence.
+- Never place two `hero / lower-left` pages consecutively. Use a structural summary before a single final closing hero.
+- A short final CTA uses `hero / center` so the visual weight sits in the frame center. Reserve `hero / lower-left` for a deliberate reveal or closing statement with grounded editorial weight. When narration contains two actions, select one primary visible action or use a structural layout.
 - A single concept uses a hero, statement-mark, or evidence-hero family rather than a multi-card shell.
 - If the source mentions named tools, products, stages, or examples, show those named items in the component; do not postpone the examples to a later page without reason.
 - Repeated subtitle and card text is a QA failure. Each semantic statement appears once unless repetition is deliberately used as a rhetorical device.
@@ -240,10 +248,11 @@ Generated article copy must preserve the author's concrete nouns, memorable phra
 
 - Every `[data-qa-box]` must satisfy `scrollWidth <= clientWidth` and `scrollHeight <= clientHeight`.
 - Every content box must remain inside `0,0–1920,1080`.
+- The final timeline label must use the approved `.end` alignment behavior. A right-edge label without endpoint alignment is an out-of-bounds failure even if its parent timeline panel fits.
 - Main spoken explanation must compute to at least `48px`; card/list/step descriptions must compute to at least `36px`.
 - Sibling evidence regions must not intersect unless the family explicitly declares circle overlap.
 - Browser QA must wait for `document.fonts.ready`, then check all four production families with `document.fonts.check()`.
-- Browser QA must inspect all 30 slides; representative visual review must include hero, editorial, values, timeline, metric, compare, and roadmap variants.
+- Browser QA must inspect all 31 slides; representative visual review must include hero, editorial, values, timeline, metric, compare, and roadmap variants.
 - A failed font, overflow, collision, or clipped glyph is reported before repair; no silent correction.
 
 ## Motion

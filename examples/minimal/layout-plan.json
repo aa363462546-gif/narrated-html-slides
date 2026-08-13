@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "template": "field-notes-a",
+  "scenes": [
+    {
+      "scene_id": "scene-01",
+      "narration": "先看事实，再看结论。",
+      "semantic_role": "opening",
+      "item_count": 1,
+      "layout": "cover",
+      "variant": null,
+      "reason": "开场只提出整篇内容的总主题。"
+    },
+    {
+      "scene_id": "scene-02",
+      "narration": "事实回答发生了什么，结论回答我们应该怎么做。",
+      "semantic_role": "concept",
+      "item_count": 1,
+      "layout": "core-idea",
+      "variant": null,
+      "reason": "这一页解释一个核心概念。"
+    }
+  ]
+}
