@@ -6,11 +6,19 @@
   "type": "module",
   "scripts": {
     "doctor": "node scripts/doctor.mjs",
+    "build-registry": "node scripts/build-layout-registry.mjs",
+    "coverage": "node scripts/create-coverage-plan.mjs",
+    "finalize-plan": "node scripts/finalize-layout-plan.mjs",
     "assemble": "node scripts/assemble-slides.mjs",
+    "validate-job": "node scripts/validate-job.mjs",
+    "build-probes": "node scripts/build-representative-probes.mjs",
     "test": "node --test tests/*.test.mjs",
     "validate-skill": "node scripts/validate-skill.mjs"
   },
   "devDependencies": {
     "puppeteer-core": "^24.16.0"
+  },
+  "dependencies": {
+    "parse5": "^7.3.0"
   }
 }

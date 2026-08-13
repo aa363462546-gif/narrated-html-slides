@@ -1,58 +1,57 @@
 # HTML Job Contract
 
-Use one directory per article:
+The core deliverable is `slides.html`. Planning and QA files support it; no audio or video artifact is generated, copied, edited, analyzed, mixed, or rendered.
 
 ```text
 jobs/<template-id>/<job-name>/
 ├── manifest.json
-├── source.md
+├── source.md or source.srt
+├── layout-plan.draft.json
 ├── layout-plan.json
+├── coverage-plan.json
 ├── slide-content.json
-├── assets/fonts/      # when the selected template uses bundled local fonts
+├── assets/                 # user-supplied approved visual assets and bundled fonts only
+├── qa-report.json
 └── slides.html
 ```
 
-All five files are mandatory. Do not create empty media or output directories.
+## Input Types
 
-`slide-content.json` contains slot data only. It never contains HTML, CSS, class names, coordinates, or DOM structure. The stable section and shell are cloned from the selected mother template by `scripts/assemble-slides.mjs`:
+- `text`: complete source in `source.md`.
+- `srt_audio`: original SRT in `source.srt`; `manifest.json` may record a matching audio path as an external input reference. No script in this Skill may open or process that audio.
+
+Input and output paths in the manifest are job-relative except an optional user-provided audio reference. Generated HTML must never contain machine-specific absolute paths.
+
+## Slot Content
+
+`slide-content.json` uses registry-backed slot data only:
 
 ```json
 {
-  "version": 2,
-  "title": "浏览器标题",
+  "version": 3,
+  "theme": {"preset": "botanical-deep"},
   "slides": [
     {
       "scene_id": "scene-01",
+      "layout_id": "field-notes-a--core-idea",
       "slots": {
-        "eyebrow": "COMPUTER CONTROL",
-        "title": "第四层：操控整台电脑",
-        "subtitle": "computer use 让 AI 像人一样操作电脑。",
-        "orbit_label": "AI / USER\nWORKFLOW"
-      }
+        "title-01": {
+          "segments": [
+            {"text": "让 AI 操作", "tone": "primary"},
+            {"text": "整台电脑", "tone": "accent"}
+          ]
+        }
+      },
+      "assets": {}
     }
   ]
 }
 ```
 
-The entries must match `layout-plan.json` exactly and in order. Slot names and item counts are fixed by the canonical schema for that layout/variant. Unknown or missing slots fail assembly. The assembler rejects the legacy `html` field and supplies the complete section, `aria-label`, layout attributes, page counters, deck shell, navigation, styles, and scripts from the approved mother template.
+- Plain-text slots accept strings only.
+- Semantic-text slots accept ordered text segments and registered tones. One complete title may use at most two distinct tones; the same tone may appear in multiple discontinuous segments.
+- HTML, CSS, `style`, class names, DOM fragments, coordinates, font declarations, and unregistered keys fail assembly.
+- Asset slots accept only manifest-registered real files. Generated images require explicit user authorization recorded in the manifest.
+- Missing assets make asset-dependent layouts unavailable; empty frames and fabricated screenshots are forbidden.
 
-## Invariants
-
-- `manifest.json` records `template`, `job_name`, and job-relative file paths only. It must not contain a project root, home directory, drive letter, or another machine-specific absolute path.
-- `source.md` preserves the user's complete source.
-- For SRT input, `source.md` preserves the SRT blocks and timestamps verbatim. Every planned scene records a continuous cue range and exact start/end seconds; no ordinary scene may exceed 15 seconds.
-- `layout-plan.json` is written and validated before HTML. It covers the source exactly, records semantic role and item count, and selects only approved layouts with a concrete reason.
-- `slide-content.json` uses `version: 2` and contains one slot-data entry per planned scene. It cannot contain authored markup. Task-specific build scripts are not job artifacts.
-- Every output section is cloned from the exact `template.html` section matching its layout/variant. Its class tokens and DOM hierarchy are not authored by an Agent.
-- `slides.html` uses exactly one bundled template and a fixed 1920 x 1080 stage. The bundled catalog itself may omit job ids and narration labels; the copied job output may not.
-- Every slide is a `<section class="slide">` with a unique id and complete narration in `aria-label`.
-- Each visible slide must use an approved layout from the selected template and remain within the authored 1920 x 1080 stage.
-- Scene ids, narration, layout, variant, and order in `slides.html` must exactly match `layout-plan.json`.
-- Every `visible_terms` entry must be visibly rendered inside its slide. Metadata and `aria-label` do not satisfy this requirement.
-- Generated HTML must not contain machine-specific absolute paths or depend on `frontend-slides`.
-- Multi-page HTML preserves the selected template's presentation shell and exposes visible previous/next controls. Keyboard, click, wheel, and touch navigation remain usable in a normal browser preview.
-- Fonts used by the copied template are copied into the job and referenced with job-relative paths. Missing font requests are validation failures, not warnings.
-
-Downstream audio, subtitle, timing, composition, and video files are deliberately outside this contract. They must not be added as empty placeholders merely to satisfy this Skill.
-
-The template category is data-driven: `<template-id>` must match a complete directory under `assets/templates/`. Adding a future template directory makes that id available to `create-job.mjs`; the script does not maintain a hard-coded A/B list.
+The assembler clones the exact section selected by stable `data-layout-id`, fills approved slots, and owns shell, DOM, classes, page counters, navigation, theme mapping, and semantic spans.

@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "template": "field-notes-a",
+  "job_name": "minimal",
+  "input": {"type": "text"},
+  "permissions": {"generated_images_authorized": false},
+  "files": {
+    "source": "source.md",
+    "layout_plan_draft": "layout-plan.draft.json",
+    "layout_plan": "layout-plan.json",
+    "coverage_plan": "coverage-plan.json",
+    "slide_content": "slide-content.json",
+    "slides": "slides.html",
+    "qa_report": "qa-report.json"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "audited_at": "2026-08-14",
+  "substitution_allowed": false,
+  "templates": {
+    "field-notes-a": {
+      "publish_status": "blocked_by_font",
+      "approved_families": ["Noto Serif SC", "Noto Sans SC", "DM Mono"],
+      "missing_families": ["Noto Serif SC", "Noto Sans SC", "DM Mono"],
+      "available_files": [],
+      "note": "Development may continue, but publication is blocked until the exact approved fonts and licenses are bundled and browser-verified."
+    },
+    "dark-teal-intelligence": {
+      "publish_status": "blocked_by_font",
+      "approved_families": ["Smiley Sans Local", "Manrope Local", "IBM Plex Sans SC Local", "IBM Plex Mono"],
+      "missing_families": ["IBM Plex Mono"],
+      "available_files": [
+        {"path": "smiley-sans/SmileySans-Oblique.otf", "sha256": "139b5dcbe70d6d52de85a62d148784c6af4bd161e38fdb62ba0c1e7e5065fca6", "license": "smiley-sans/OFL.txt"},
+        {"path": "manrope/Manrope-Variable.ttf", "sha256": "d0639be45d0af36e798172419d7bd173c4bd4f29e2b76cbb69db1d11bf8b0a40", "license": "manrope/OFL.txt"},
+        {"path": "ibm-plex-sans-sc/IBMPlexSansSC-Regular.woff2", "sha256": "39967c10c916cc9166b5b0c58e605eb722c8d271f263b42e93af9836dca3d352", "license": "ibm-plex-sans-sc/LICENSE.txt"},
+        {"path": "ibm-plex-sans-sc/IBMPlexSansSC-Medium.woff2", "sha256": "98921db796301c9ebcdff61dcb354234ae83d404f020827749f12db1e5e0f856", "license": "ibm-plex-sans-sc/LICENSE.txt"}
+      ],
+      "note": "Development may continue, but publication is blocked until IBM Plex Mono is bundled and browser-verified."
+    }
+  }
+}

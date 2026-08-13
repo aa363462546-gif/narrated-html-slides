@@ -1,11 +1,11 @@
 # Narrated HTML Slides
 
-A Codex Skill for turning complete articles or narration into fixed-stage HTML slides. It ships with two production templates:
+A self-contained Codex Skill for turning complete articles, or matching SRT plus audio inputs, into fixed-stage HTML slides. It ships with two production templates:
 
 - Field Notes A: deep-green botanical editorial style.
 - Dark Teal Intelligence: charcoal and teal evidence-led report style.
 
-The Skill is self-contained for HTML generation and does not require `frontend-slides`. Audio generation, subtitles, and video rendering are intentionally outside this repository and can be used independently afterward.
+The core product is `slides.html`; manifests, layout plans, coverage plans, and QA reports are supporting artifacts. SRT is used for cue traceability and semantic pagination. A matching audio path may be recorded as an input reference, but this Skill never opens, processes, generates, mixes, or renders audio or video and never reads another project.
 
 ## Install
 

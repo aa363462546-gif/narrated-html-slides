@@ -1,12 +1,11 @@
-# HTML Dependencies
-
-Run `node scripts/doctor.mjs --json` before generating or checking HTML.
-
-## Required For HTML
+# Local Dependencies And Publication Status
 
 - Node.js 22 or newer.
-- A Chromium-family browser for rendered QA.
-- `puppeteer-core`, resolved first from this Skill and then from the current project. A generated deck does not pass rendered QA when the browser driver is unavailable.
-- Network access when a template loads remote fonts. For offline use, the bundled font assets and template-local `@font-face` declarations should be preferred.
+- A Chromium-family browser.
+- `parse5` for deterministic DOM parsing and serialization.
+- `puppeteer-core` for rendered desktop and phone QA.
+- Exact approved local font files and their licenses for publication.
 
-No audio engine, subtitle parser, video renderer, or external media CLI is required by this Skill. Those tools may be installed and used by a separate downstream workflow.
+Run `node scripts/doctor.mjs --json`. Development may continue when a template is `blocked_by_font`, but outputs from that template cannot be called publishable. Runtime network fonts and silent substitutions are not valid publication dependencies.
+
+No audio engine, subtitle generator, video renderer, media CLI, or external project is used by this Skill.

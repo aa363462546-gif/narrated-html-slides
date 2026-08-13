@@ -2,7 +2,6 @@
   "version": 2,
   "template": "field-notes-a",
   "source_type": "text",
-  "cue_numbering": "one_based_inclusive_parsed_order",
   "scenes": [{
     "scene_id": "scene-01",
     "narration": "事实回答发生了什么，结论回答应该怎么做。",
