@@ -14,6 +14,7 @@ Write and validate `layout-plan.json` before creating `slides.html`.
       "item_count": 1,
       "layout": "cover",
       "variant": null,
+      "visible_terms": [],
       "reason": "开场只表达一个总主题"
     }
   ]
@@ -24,9 +25,23 @@ For Dark Teal Intelligence, use its approved family in `layout` and approved nam
 
 Allowed semantic roles are: `opening`, `question`, `concept`, `parallel-items`, `comparison`, `process`, `evidence`, `metric`, `audience`, `timeline`, `roadmap`, `caution`, and `closing`.
 
+When the input is SRT, preserve `source.md` as the original SRT and add these fields to every scene:
+
+```json
+{
+  "cue_start": 1,
+  "cue_end": 6,
+  "start_sec": 0.066,
+  "end_sec": 12.066
+}
+```
+
+Cue numbers are 1-based and inclusive. Ranges must be continuous, cover every cue once, and match the cue timestamps exactly. Aim for 6-12 seconds per ordinary page; 15 seconds is the hard maximum. If a semantic unit is longer, split it across multiple approved layouts instead of compressing it into one page.
+
 ## Planning Rules
 
 - Preserve the complete source across scene narrations exactly and in order. Visible copy may be condensed later; narration may not.
+- Put every product, project, person, platform, or tool name that the audience must see into `visible_terms`. An empty array is valid only when the scene contains no such required name. These terms must appear in visible slide copy; `aria-label` does not count.
 - Count the actual semantic items. A comparison has two sides; three named tools have item count three; ordered stages use their real count.
 - Count concrete examples and summary pillars even on opening and closing pages. A multi-item opening needs a structured hero variant; a multi-item closing needs a structural summary before the final CTA.
 - Select the layout from meaning and capacity, not from visual variety alone.

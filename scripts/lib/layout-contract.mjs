@@ -95,6 +95,30 @@ export function normalizeNarration(value) {
     .toLocaleLowerCase("zh-CN");
 }
 
+function parseTimestamp(value) {
+  const match = String(value).match(/^(\d{2}):(\d{2}):(\d{2})[,.](\d{3})$/u);
+  if (!match) return null;
+  return Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]) + Number(match[4]) / 1000;
+}
+
+export function parseSrt(source) {
+  const blocks = String(source).replace(/\r/gu, "").trim().split(/\n{2,}/u);
+  const cues = [];
+  for (const block of blocks) {
+    const lines = block.split("\n");
+    const numericId = /^\d+$/u.test(lines[0]?.trim() ?? "");
+    const timingIndex = numericId ? 1 : 0;
+    const timing = lines[timingIndex]?.match(/^(\d{2}:\d{2}:\d{2}[,.]\d{3})\s+-->\s+(\d{2}:\d{2}:\d{2}[,.]\d{3})/u);
+    if (!timing) continue;
+    const text = lines.slice(timingIndex + 1).join("\n").trim();
+    const start_sec = parseTimestamp(timing[1]);
+    const end_sec = parseTimestamp(timing[2]);
+    if (!text || start_sec == null || end_sec == null) continue;
+    cues.push({index: cues.length + 1, start_sec, end_sec, text});
+  }
+  return cues;
+}
+
 export async function readLayoutPlan(planPath) {
   return JSON.parse(await readFile(planPath, "utf8"));
 }
@@ -110,6 +134,8 @@ export function validateLayoutPlan(plan, source) {
   const template = plan?.template;
   if (!ROLE_LAYOUTS[template]) errors.push("template must be field-notes-a or dark-teal-intelligence");
   const scenes = Array.isArray(plan?.scenes) ? plan.scenes : [];
+  const sourceCues = source == null ? [] : parseSrt(source);
+  const srtMode = sourceCues.length > 0;
   if (!scenes.length) errors.push("layout-plan.json needs scenes[]");
 
   const ids = new Set();
@@ -122,6 +148,32 @@ export function validateLayoutPlan(plan, source) {
     if (!ROLES.has(scene?.semantic_role)) errors.push(`${label}: invalid semantic_role`);
     if (!String(scene?.reason ?? "").trim()) errors.push(`${label}: layout selection reason is required`);
     if (!Number.isInteger(scene?.item_count) || scene.item_count < 1) errors.push(`${label}: item_count must be a positive integer`);
+    if (source != null && !Array.isArray(scene?.visible_terms)) errors.push(`${label}: visible_terms must be an array`);
+    else if (Array.isArray(scene?.visible_terms)) {
+      for (const term of scene.visible_terms) {
+        if (!String(term).trim()) errors.push(`${label}: visible_terms cannot contain empty values`);
+        else if (!normalizeNarration(scene.narration).includes(normalizeNarration(term))) errors.push(`${label}: visible term "${term}" is not present in narration`);
+      }
+    }
+
+    if (srtMode) {
+      if (!Number.isInteger(scene?.cue_start) || !Number.isInteger(scene?.cue_end)) {
+        errors.push(`${label}: SRT input requires integer cue_start and cue_end`);
+      } else if (scene.cue_start < 1 || scene.cue_end < scene.cue_start || scene.cue_end > sourceCues.length) {
+        errors.push(`${label}: invalid SRT cue range ${scene.cue_start}-${scene.cue_end}`);
+      } else {
+        const firstCue = sourceCues[scene.cue_start - 1];
+        const lastCue = sourceCues[scene.cue_end - 1];
+        const expectedStart = firstCue.start_sec;
+        const expectedEnd = lastCue.end_sec;
+        if (!Number.isFinite(scene.start_sec) || Math.abs(scene.start_sec - expectedStart) > 0.01) errors.push(`${label}: start_sec must match cue ${scene.cue_start} (${expectedStart})`);
+        if (!Number.isFinite(scene.end_sec) || Math.abs(scene.end_sec - expectedEnd) > 0.01) errors.push(`${label}: end_sec must match cue ${scene.cue_end} (${expectedEnd})`);
+        const duration = expectedEnd - expectedStart;
+        if (duration > 15.001) errors.push(`${label}: SRT scene duration ${duration.toFixed(3)}s exceeds the 15s maximum; split the scene`);
+        const cueNarration = sourceCues.slice(scene.cue_start - 1, scene.cue_end).map((cue) => cue.text).join("\n");
+        if (normalizeNarration(scene.narration) !== normalizeNarration(cueNarration)) errors.push(`${label}: narration must exactly match its SRT cue range`);
+      }
+    }
 
     if (template === "field-notes-a") {
       if (!A_LAYOUTS.has(scene?.layout)) errors.push(`${label}: unapproved Field Notes A layout ${scene?.layout}`);
@@ -148,8 +200,18 @@ export function validateLayoutPlan(plan, source) {
     }
   }
 
+  if (srtMode && scenes.length) {
+    let expectedCue = 1;
+    for (const scene of scenes) {
+      if (scene.cue_start !== expectedCue) errors.push(`${scene.scene_id}: SRT cue ranges must be continuous; expected cue_start ${expectedCue}`);
+      if (Number.isInteger(scene.cue_end)) expectedCue = scene.cue_end + 1;
+    }
+    if (expectedCue !== sourceCues.length + 1) errors.push(`SRT cue coverage must end at cue ${sourceCues.length}`);
+  }
+
   const plannedSource = scenes.map((scene) => scene.narration).join("");
-  if (source != null && normalizeNarration(plannedSource) !== normalizeNarration(source)) {
+  const sourceNarration = srtMode ? sourceCues.map((cue) => cue.text).join("") : source;
+  if (source != null && normalizeNarration(plannedSource) !== normalizeNarration(sourceNarration)) {
     errors.push("layout plan narration must cover source.md exactly and in order");
   }
 
@@ -180,6 +242,8 @@ export function validateLayoutPlan(plan, source) {
     ok: errors.length === 0,
     template,
     scene_count: scenes.length,
+    source_type: srtMode ? "srt" : "text",
+    cue_count: sourceCues.length,
     distinct_layouts: new Set(scenes.map(layoutKey)).size,
     errors,
     warnings,

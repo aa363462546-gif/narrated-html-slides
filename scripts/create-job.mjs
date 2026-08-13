@@ -51,6 +51,7 @@ await writeFile(path.join(jobDir, "manifest.json"), `${JSON.stringify({
   files: {
     source: "source.md",
     layout_plan: "layout-plan.json",
+    slide_content: "slide-content.json",
     slides: "slides.html",
   },
 }, null, 2)}\n`, "utf8");

@@ -24,6 +24,19 @@ const slides = sectionMatches.map((match) => match[1]).filter((attrs) => {
   const classes = attrs.match(/\bclass=["']([^"']*)["']/iu)?.[1]?.split(/\s+/u) ?? [];
   return classes.includes("slide");
 });
+const slideBodies = [...html.matchAll(/<section\b([^>]*)>([\s\S]*?)<\/section>/giu)]
+  .filter((match) => (match[1].match(/\bclass=["']([^"']*)["']/iu)?.[1]?.split(/\s+/u) ?? []).includes("slide"));
+
+function visibleText(fragment) {
+  return String(fragment)
+    .replace(/<script\b[\s\S]*?<\/script>/giu, " ")
+    .replace(/<style\b[\s\S]*?<\/style>/giu, " ")
+    .replace(/<[^>]+>/gu, " ")
+    .replace(/&nbsp;|&#160;/giu, " ")
+    .replace(/&amp;/giu, "&")
+    .replace(/&quot;|&#34;/giu, '"')
+    .replace(/&#39;|&apos;/giu, "'");
+}
 
 if (!slides.length) errors.push("No <section class=\"slide\"> elements found");
 const ids = slides.map((attrs) => attrs.match(/\bid=["']([^"']+)["']/iu)?.[1]).filter(Boolean);
@@ -56,6 +69,12 @@ if (!templateMode) {
           if (narration !== expected.narration) errors.push(`${expected.scene_id}: aria-label does not match layout plan narration`);
           if (actualLayout !== expected.layout || actualVariant !== (expected.variant ?? null)) {
             errors.push(`${expected.scene_id}: HTML uses ${actualLayout}/${actualVariant}, plan requires ${layoutKey(expected)}`);
+          }
+          const bodyText = visibleText(slideBodies[index]?.[2] ?? "");
+          for (const term of expected.visible_terms ?? []) {
+            if (!bodyText.normalize("NFKC").toLocaleLowerCase("zh-CN").includes(String(term).normalize("NFKC").toLocaleLowerCase("zh-CN"))) {
+              errors.push(`${expected.scene_id}: required visible term "${term}" is not shown in slide body`);
+            }
           }
         });
       }

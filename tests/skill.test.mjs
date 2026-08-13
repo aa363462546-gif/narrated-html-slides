@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {access, readFile} from "node:fs/promises";
-import {mkdtemp, rm} from "node:fs/promises";
+import {mkdtemp, mkdir, rm, writeFile} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
@@ -21,6 +21,8 @@ test("Skill metadata and resources are complete", async () => {
     "agents/openai.yaml",
     "references/layout-plan.md",
     "scripts/lib/layout-contract.mjs",
+    "scripts/lib/canonical-sections.mjs",
+    "scripts/assemble-slides.mjs",
     "scripts/validate-layout-plan.mjs",
     "assets/templates/field-notes-a/template.html",
     "assets/templates/field-notes-a/design.md",
@@ -30,6 +32,198 @@ test("Skill metadata and resources are complete", async () => {
     "assets/fonts/ibm-plex-sans-sc/LICENSE.txt",
     "assets/fonts/smiley-sans/OFL.txt",
   ]) await access(path.join(root, relative));
+});
+
+test("SRT plans enforce exact continuous cue timing and a 15 second maximum", async () => {
+  const {validateLayoutPlan} = await import("../scripts/lib/layout-contract.mjs");
+  const srt = `1\n00:00:00,000 --> 00:00:08,000\n先介绍 Context7。\n\n2\n00:00:08,000 --> 00:00:16,100\n再介绍 GitHub。\n`;
+  const scene = {
+    scene_id: "scene-01",
+    narration: "先介绍 Context7。\n再介绍 GitHub。",
+    semantic_role: "parallel-items",
+    item_count: 2,
+    layout: "platform-list",
+    variant: null,
+    visible_terms: ["Context7", "GitHub"],
+    cue_start: 1,
+    cue_end: 2,
+    start_sec: 0,
+    end_sec: 16.1,
+    reason: "两个工具依次介绍。",
+  };
+  const tooLong = validateLayoutPlan({version: 1, template: "field-notes-a", scenes: [scene]}, srt);
+  assert.equal(tooLong.ok, false);
+  assert.match(tooLong.errors.join("\n"), /exceeds the 15s maximum/u);
+
+  const split = [
+    {...scene, scene_id: "scene-01", narration: "先介绍 Context7。", semantic_role: "concept", item_count: 1, layout: "single-card", visible_terms: ["Context7"], cue_end: 1, end_sec: 8},
+    {...scene, scene_id: "scene-02", narration: "再介绍 GitHub。", semantic_role: "concept", item_count: 1, layout: "single-card", visible_terms: ["GitHub"], cue_start: 2, cue_end: 2, start_sec: 8},
+  ];
+  assert.equal(validateLayoutPlan({version: 1, template: "field-notes-a", scenes: split}, srt).ok, true);
+  split[1].cue_start = 1;
+  const overlap = validateLayoutPlan({version: 1, template: "field-notes-a", scenes: split}, srt);
+  assert.equal(overlap.ok, false);
+  assert.match(overlap.errors.join("\n"), /cue ranges must be continuous/u);
+});
+
+test("visible terms must belong to the narration", async () => {
+  const {validateLayoutPlan} = await import("../scripts/lib/layout-contract.mjs");
+  const plan = JSON.parse(await read("examples/minimal/layout-plan.json"));
+  const source = await read("examples/minimal/source.md");
+  plan.scenes[0].visible_terms = ["不存在的产品名"];
+  const result = validateLayoutPlan(plan, source);
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join("\n"), /is not present in narration/u);
+});
+
+test("required terms hidden only in aria-label fail slide validation", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "visible-terms-"));
+  try {
+    const plan = JSON.parse(await read("examples/minimal/layout-plan.json"));
+    plan.scenes[0].visible_terms = ["事实"];
+    const html = (await read("examples/minimal/slides.html")).replace("<h1 class=\"title reveal\">先看事实</h1>", "<h1 class=\"title reveal\">先看重点</h1>");
+    const planPath = path.join(tempRoot, "layout-plan.json");
+    const htmlPath = path.join(tempRoot, "slides.html");
+    await writeFile(planPath, JSON.stringify(plan), "utf8");
+    await writeFile(htmlPath, html, "utf8");
+    await assert.rejects(
+      execFileAsync(process.execPath, ["scripts/validate-slides.mjs", htmlPath, "--plan", planPath, "--static-only"], {cwd: root}),
+      (error) => {
+        const result = JSON.parse(error.stdout);
+        assert.match(result.errors.join("\n"), /required visible term "事实" is not shown/u);
+        return true;
+      },
+    );
+  } finally {
+    await rm(tempRoot, {recursive: true, force: true});
+  }
+});
+
+test("the bundled assembler owns the template shell and avoids task-specific scripts", async () => {
+  const outputRoot = await mkdtemp(path.join(os.tmpdir(), "assembled-job-"));
+  try {
+    const jobDir = await writeCanonicalJob(outputRoot, {
+      template: "field-notes-a",
+      scene: {scene_id: "scene-01", narration: "事实与结论需要分开。", semantic_role: "concept", item_count: 1, layout: "core-idea", variant: null, visible_terms: ["事实"], reason: "单一核心观点。"},
+      slots: {eyebrow: "THE CORE IDEA", title: "先看事实", subtitle: "再形成结论。", orbit_label: "FACT / CLAIM"},
+    });
+    const {stdout} = await execFileAsync(process.execPath, ["scripts/assemble-slides.mjs", jobDir], {cwd: root});
+    const html = await readFile(stdout.trim(), "utf8");
+    assert.match(html, /id="scene-01" data-template-type="core-idea" aria-label=/u);
+    assert.match(html, /id="prev"/u);
+    assert.match(html, /01 \/ 01/u);
+    assert.match(html, /class="idea"/u);
+    assert.doesNotMatch(await read("scripts/assemble-slides.mjs"), /chatgpt-desktop-plugin-layers|plugins-20260813/u);
+  } finally {
+    await rm(outputRoot, {recursive: true, force: true});
+  }
+});
+
+async function writeCanonicalJob(tempRoot, {template, scene, slots}) {
+  const jobDir = path.join(tempRoot, template, scene.scene_id);
+  await mkdir(jobDir, {recursive: true});
+  const source = scene.narration;
+  await writeFile(path.join(jobDir, "source.md"), source, "utf8");
+  await writeFile(path.join(jobDir, "layout-plan.json"), JSON.stringify({version: 1, template, scenes: [scene]}), "utf8");
+  await writeFile(path.join(jobDir, "slide-content.json"), JSON.stringify({
+    version: 2,
+    title: "Canonical slot test",
+    slides: [{scene_id: scene.scene_id, slots}],
+  }), "utf8");
+  await writeFile(path.join(jobDir, "manifest.json"), JSON.stringify({
+    version: 1,
+    template,
+    job_name: scene.scene_id,
+    files: {
+      source: "source.md",
+      layout_plan: "layout-plan.json",
+      slide_content: "slide-content.json",
+      slides: "slides.html",
+    },
+  }), "utf8");
+  return jobDir;
+}
+
+test("canonical slot assembly clones the approved DOM for six high-risk layouts", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "canonical-slots-"));
+  const cases = [
+    {
+      template: "field-notes-a",
+      scene: {scene_id: "a-core", narration: "第四层操控整台电脑，computer use 值得关注。", semantic_role: "concept", item_count: 1, layout: "core-idea", variant: null, visible_terms: ["computer use"], reason: "单一核心观点。"},
+      slots: {eyebrow: "COMPUTER CONTROL", title: "第四层：操控整台电脑", subtitle: "computer use 值得关注。", orbit_label: "AI / USER\nWORKFLOW"},
+      required: ["idea", "browser-orbit", "orbit-label"],
+      forbidden: ["core", "orbit"],
+    },
+    {
+      template: "field-notes-a",
+      scene: {scene_id: "a-cap", narration: "Mac 可以不占用电脑、同步协作并记录流程。", semantic_role: "parallel-items", item_count: 3, layout: "capability-grid", variant: null, visible_terms: ["Mac"], reason: "三个并列能力。"},
+      slots: {eyebrow: "MAC EXPERIENCE", title: "Mac：可以同步工作", items: [{index: "01", title: "不占用电脑", body: "仍能继续做自己的事。"}, {index: "02", title: "同步协作", body: "可以与 AI 同时推进。"}, {index: "03", title: "记录流程", body: "保存成可复用流程。"}]},
+      required: ["cap-head", "cap-grid", "cap", "cap-no"],
+      forbidden: ["capabilities", "capability-grid", "capability"],
+    },
+    {
+      template: "field-notes-a",
+      scene: {scene_id: "a-compare", narration: "Remotion 与 Hyperframes 都可以生成动画视频。", semantic_role: "comparison", item_count: 2, layout: "dual-compare", variant: null, visible_terms: ["Remotion", "Hyperframes"], reason: "两个工具对比。"},
+      slots: {eyebrow: "CREATIVE TOOLS", title: "两种动画视频工具", items: [{label: "A", title: "Remotion", body: "代码驱动动画。", index: "A"}, {label: "B", title: "Hyperframes", body: "HTML 驱动动画。", index: "B"}]},
+      required: ["dual-compare", "dual-compare-grid", "compare-card"],
+      forbidden: [],
+    },
+    {
+      template: "dark-teal-intelligence",
+      scene: {scene_id: "b-boundary", narration: "Excel 改表需要确认，配上 VBA 才能自动化。", semantic_role: "comparison", item_count: 2, layout: "compare", variant: "capability-boundary", visible_terms: ["Excel", "VBA"], reason: "能力边界。"},
+      slots: {eyebrow: "EXCEL + VBA", title: "改表只是 Excel 的起点", items: [{mark: "✓", title: "逐处确认", body: "确认后才修改。", caption: "表格协作"}, {mark: "?", title: "配上 VBA", body: "把 Excel 变成自动化工具。", caption: "规则驱动"}]},
+      required: ["capability-boundary", "capability-side", "capability-title", "capability-copy", "capability-caption"],
+      forbidden: ["compare-grid", "compare-card", "compare-caption"],
+    },
+    {
+      template: "dark-teal-intelligence",
+      scene: {scene_id: "b-values", narration: "内容、公式、格式、图表都可以修改。", semantic_role: "parallel-items", item_count: 4, layout: "values-grid", variant: "four-up", visible_terms: [], reason: "四项并列。"},
+      slots: {eyebrow: "EXCEL LIVE CONTROL", title: "四类表格操作", items: [{index: "01", title: "内容", body: "修改单元格内容。"}, {index: "02", title: "公式", body: "调整计算逻辑。"}, {index: "03", title: "格式", body: "统一呈现规范。"}, {index: "04", title: "图表", body: "生成可视化。"}]},
+      required: ["values-grid", "value-card", "value-index"],
+      forbidden: [],
+    },
+    {
+      template: "dark-teal-intelligence",
+      scene: {scene_id: "b-editorial", narration: "spreadsheets 让 ChatGPT 进入 Excel 工作。", semantic_role: "concept", item_count: 1, layout: "editorial", variant: "statement-mark", visible_terms: ["spreadsheets", "ChatGPT", "Excel"], reason: "单一工具观点。"},
+      slots: {eyebrow: "OFFICE CONTROL", title: "第一层：操作软件", quote: "spreadsheets 让 ChatGPT 进入 Excel 工作。", note: "先从最常用的办公软件开始。", mark: "XLS"},
+      required: ["statement-mark-region", "statement-copy", "statement-quote", "statement-note", "statement-mark"],
+      forbidden: [],
+    },
+  ];
+  try {
+    for (const item of cases) {
+      const jobDir = await writeCanonicalJob(tempRoot, item);
+      const {stdout} = await execFileAsync(process.execPath, ["scripts/assemble-slides.mjs", jobDir], {cwd: root});
+      const html = await readFile(stdout.trim(), "utf8");
+      for (const className of item.required) assert.match(html, new RegExp(`class="(?:[^"]*\\s)?${className}(?:\\s[^"]*)?"`, "u"), `${item.scene.scene_id} must use .${className}`);
+      for (const className of item.forbidden) assert.doesNotMatch(html, new RegExp(`class="(?:[^"]*\\s)?${className}(?:\\s[^"]*)?"`, "u"), `${item.scene.scene_id} must not use .${className}`);
+      for (const term of item.scene.visible_terms) assert.match(html, new RegExp(term, "iu"));
+    }
+  } finally {
+    await rm(tempRoot, {recursive: true, force: true});
+  }
+});
+
+test("canonical layouts reject arbitrary authored inner HTML", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "canonical-reject-html-"));
+  try {
+    const item = {
+      template: "field-notes-a",
+      scene: {scene_id: "scene-01", narration: "computer use 操控电脑。", semantic_role: "concept", item_count: 1, layout: "core-idea", variant: null, visible_terms: ["computer use"], reason: "单一观点。"},
+      slots: {},
+    };
+    const jobDir = await writeCanonicalJob(tempRoot, item);
+    await writeFile(path.join(jobDir, "slide-content.json"), JSON.stringify({title: "bad", slides: [{scene_id: "scene-01", html: '<div class="core"><div class="orbit">computer use</div></div>'}]}), "utf8");
+    await assert.rejects(
+      execFileAsync(process.execPath, ["scripts/assemble-slides.mjs", jobDir], {cwd: root}),
+      (error) => {
+        assert.match(error.stderr, /version 2|slots|arbitrary inner HTML/iu);
+        return true;
+      },
+    );
+  } finally {
+    await rm(tempRoot, {recursive: true, force: true});
+  }
 });
 
 test("job creation is grouped by template and writes a portable manifest", async () => {
@@ -51,6 +245,7 @@ test("job creation is grouped by template and writes a portable manifest", async
       files: {
         source: "source.md",
         layout_plan: "layout-plan.json",
+        slide_content: "slide-content.json",
         slides: "slides.html",
       },
     });

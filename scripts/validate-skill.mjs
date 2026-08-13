@@ -12,6 +12,8 @@ const required = [
   "references/job-contract.md",
   "references/layout-plan.md",
   "scripts/lib/layout-contract.mjs",
+  "scripts/lib/canonical-sections.mjs",
+  "scripts/assemble-slides.mjs",
   "scripts/validate-layout-plan.mjs",
   "assets/templates/field-notes-a/design.md",
   "assets/templates/field-notes-a/template.html",
