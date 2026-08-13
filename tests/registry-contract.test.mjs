@@ -33,11 +33,22 @@ test("every mother section has one registry-backed data-layout-id", async () => 
   }
 });
 
-test("font inventory blocks publication without substituting approved faces", async () => {
+test("font inventory publishes only exact locally verified approved faces", async () => {
   const inventory = JSON.parse(await read("assets/fonts/font-inventory.json"));
-  assert.equal(inventory.templates["field-notes-a"].publish_status, "blocked_by_font");
-  assert.equal(inventory.templates["dark-teal-intelligence"].publish_status, "blocked_by_font");
-  assert.deepEqual(inventory.templates["field-notes-a"].missing_families, ["Noto Serif SC", "Noto Sans SC", "DM Mono"]);
-  assert.deepEqual(inventory.templates["dark-teal-intelligence"].missing_families, ["IBM Plex Mono"]);
   assert.equal(inventory.substitution_allowed, false);
+  for (const template of ["field-notes-a", "dark-teal-intelligence"]) {
+    const record = inventory.templates[template];
+    assert.equal(record.publish_status, "publishable");
+    assert.deepEqual(record.missing_families, []);
+    assert.ok(record.browser_verified_at);
+    for (const font of record.available_files) {
+      assert.match(font.path, /\.(?:ttf|otf|woff2)$/u);
+      assert.ok(font.family);
+      assert.ok(font.weight);
+      assert.match(font.sha256, /^[a-f0-9]{64}$/u);
+      assert.ok(font.license);
+      assert.equal(font.browser_recognized, true);
+      await read(`assets/fonts/${font.license}`);
+    }
+  }
 });

@@ -1,26 +1,148 @@
 {
-  "version": 1,
+  "version": 2,
   "audited_at": "2026-08-14",
   "substitution_allowed": false,
   "templates": {
     "field-notes-a": {
-      "publish_status": "blocked_by_font",
+      "publish_status": "publishable",
       "approved_families": ["Noto Serif SC", "Noto Sans SC", "DM Mono"],
-      "missing_families": ["Noto Serif SC", "Noto Sans SC", "DM Mono"],
-      "available_files": [],
-      "note": "Development may continue, but publication is blocked until the exact approved fonts and licenses are bundled and browser-verified."
+      "missing_families": [],
+      "browser_verified_at": "2026-08-14T02:03:29+08:00",
+      "available_files": [
+        {
+          "path": "noto-serif-sc/NotoSerifSC-wght.ttf",
+          "family": "Noto Serif SC",
+          "weight": "600-900 variable",
+          "sha256": "050080d9255a86808f2945bffac582b31ef32bc36411ce29563b4961670c66f9",
+          "license": "noto-serif-sc/OFL.txt",
+          "source_repository": "https://github.com/google/fonts",
+          "source_commit": "73fc2ff52147e34a74804b500cf89ca219eac55d",
+          "browser_recognized": true,
+          "browser_css_family": "Noto Serif SC",
+          "browser_platform_family": "Noto Serif SC ExtraLight",
+          "browser_postscript_instances": ["NotoSerifSC-SemiBold", "NotoSerifSC-Black"]
+        },
+        {
+          "path": "noto-sans-sc/NotoSansSC-wght.ttf",
+          "family": "Noto Sans SC",
+          "weight": "400-500 variable",
+          "sha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da",
+          "license": "noto-sans-sc/OFL.txt",
+          "source_repository": "https://github.com/google/fonts",
+          "source_commit": "73fc2ff52147e34a74804b500cf89ca219eac55d",
+          "browser_recognized": true,
+          "browser_css_family": "Noto Sans SC",
+          "browser_platform_family": "Noto Sans SC Thin",
+          "browser_postscript_instances": ["NotoSansSC-Thin_Regular", "NotoSansSC-Thin_Medium"]
+        },
+        {
+          "path": "dm-mono/DMMono-Regular.ttf",
+          "family": "DM Mono",
+          "weight": 400,
+          "sha256": "55b4c98f123daebb3ed27947ba47b2af00554fc6284d639a540bcef5e6258ad2",
+          "license": "dm-mono/OFL.txt",
+          "source_repository": "https://github.com/google/fonts",
+          "source_commit": "73fc2ff52147e34a74804b500cf89ca219eac55d",
+          "browser_recognized": true,
+          "browser_css_family": "DM Mono",
+          "browser_platform_family": "DM Mono",
+          "browser_postscript": "DMMono-Regular"
+        },
+        {
+          "path": "dm-mono/DMMono-Medium.ttf",
+          "family": "DM Mono",
+          "weight": 500,
+          "sha256": "fd327daf461db87b44a87def475d251bf03b997f7c07d9680592d75dbbfaad0b",
+          "license": "dm-mono/OFL.txt",
+          "source_repository": "https://github.com/google/fonts",
+          "source_commit": "73fc2ff52147e34a74804b500cf89ca219eac55d",
+          "browser_recognized": true,
+          "browser_css_family": "DM Mono",
+          "browser_platform_family": "DM Mono Medium",
+          "browser_postscript": "DMMono-Medium"
+        }
+      ],
+      "note": "All approved A families are bundled locally under SIL OFL 1.1 and were verified in Chrome with no network font requests."
     },
     "dark-teal-intelligence": {
-      "publish_status": "blocked_by_font",
+      "publish_status": "publishable",
       "approved_families": ["Smiley Sans Local", "Manrope Local", "IBM Plex Sans SC Local", "IBM Plex Mono"],
-      "missing_families": ["IBM Plex Mono"],
+      "missing_families": [],
+      "browser_verified_at": "2026-08-14T02:03:29+08:00",
       "available_files": [
-        {"path": "smiley-sans/SmileySans-Oblique.otf", "sha256": "139b5dcbe70d6d52de85a62d148784c6af4bd161e38fdb62ba0c1e7e5065fca6", "license": "smiley-sans/OFL.txt"},
-        {"path": "manrope/Manrope-Variable.ttf", "sha256": "d0639be45d0af36e798172419d7bd173c4bd4f29e2b76cbb69db1d11bf8b0a40", "license": "manrope/OFL.txt"},
-        {"path": "ibm-plex-sans-sc/IBMPlexSansSC-Regular.woff2", "sha256": "39967c10c916cc9166b5b0c58e605eb722c8d271f263b42e93af9836dca3d352", "license": "ibm-plex-sans-sc/LICENSE.txt"},
-        {"path": "ibm-plex-sans-sc/IBMPlexSansSC-Medium.woff2", "sha256": "98921db796301c9ebcdff61dcb354234ae83d404f020827749f12db1e5e0f856", "license": "ibm-plex-sans-sc/LICENSE.txt"}
+        {
+          "path": "smiley-sans/SmileySans-Oblique.otf",
+          "family": "Smiley Sans Local",
+          "weight": "600-800",
+          "sha256": "139b5dcbe70d6d52de85a62d148784c6af4bd161e38fdb62ba0c1e7e5065fca6",
+          "license": "smiley-sans/OFL.txt",
+          "browser_recognized": true
+        },
+        {
+          "path": "manrope/Manrope-Variable.ttf",
+          "family": "Manrope Local",
+          "weight": "400-800 variable",
+          "sha256": "d0639be45d0af36e798172419d7bd173c4bd4f29e2b76cbb69db1d11bf8b0a40",
+          "license": "manrope/OFL.txt",
+          "browser_recognized": true
+        },
+        {
+          "path": "ibm-plex-sans-sc/IBMPlexSansSC-Regular.woff2",
+          "family": "IBM Plex Sans SC Local",
+          "weight": 400,
+          "sha256": "39967c10c916cc9166b5b0c58e605eb722c8d271f263b42e93af9836dca3d352",
+          "license": "ibm-plex-sans-sc/LICENSE.txt",
+          "browser_recognized": true
+        },
+        {
+          "path": "ibm-plex-sans-sc/IBMPlexSansSC-Medium.woff2",
+          "family": "IBM Plex Sans SC Local",
+          "weight": "500-600",
+          "sha256": "98921db796301c9ebcdff61dcb354234ae83d404f020827749f12db1e5e0f856",
+          "license": "ibm-plex-sans-sc/LICENSE.txt",
+          "browser_recognized": true
+        },
+        {
+          "path": "ibm-plex-mono/IBMPlexMono-Regular.woff2",
+          "family": "IBM Plex Mono",
+          "weight": 400,
+          "sha256": "ba204497f16b6d334cee9d1e963a831b73e3a56e1d6300a8489d18df7214b350",
+          "license": "ibm-plex-mono/OFL.txt",
+          "source_repository": "https://github.com/IBM/plex",
+          "source_commit": "bf260093582f04622aacc1e9f9ca604d7ccd0c42",
+          "browser_recognized": true,
+          "browser_css_family": "IBM Plex Mono",
+          "browser_platform_family": "IBM Plex Mono",
+          "browser_postscript": "IBMPlexMono"
+        },
+        {
+          "path": "ibm-plex-mono/IBMPlexMono-Medium.woff2",
+          "family": "IBM Plex Mono",
+          "weight": 500,
+          "sha256": "33faf307fa6031fb4062276d7320a6d632de890cbb347576fd80cfa01077bc25",
+          "license": "ibm-plex-mono/OFL.txt",
+          "source_repository": "https://github.com/IBM/plex",
+          "source_commit": "bf260093582f04622aacc1e9f9ca604d7ccd0c42",
+          "browser_recognized": true,
+          "browser_css_family": "IBM Plex Mono",
+          "browser_platform_family": "IBM Plex Mono Medm",
+          "browser_postscript": "IBMPlexMono-Medm"
+        },
+        {
+          "path": "ibm-plex-mono/IBMPlexMono-SemiBold.woff2",
+          "family": "IBM Plex Mono",
+          "weight": 600,
+          "sha256": "6a825b4824c01cbb401e829e5a066a1818411bcb3538b5a5792c5ca9b82343c3",
+          "license": "ibm-plex-mono/OFL.txt",
+          "source_repository": "https://github.com/IBM/plex",
+          "source_commit": "bf260093582f04622aacc1e9f9ca604d7ccd0c42",
+          "browser_recognized": true,
+          "browser_css_family": "IBM Plex Mono",
+          "browser_platform_family": "IBM Plex Mono SmBld",
+          "browser_postscript": "IBMPlexMono-SmBld"
+        }
       ],
-      "note": "Development may continue, but publication is blocked until IBM Plex Mono is bundled and browser-verified."
+      "note": "All approved B families are bundled locally; IBM Plex Mono is from IBM's official OFL repository and was verified in Chrome with no network font requests."
     }
   }
 }

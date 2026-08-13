@@ -27,7 +27,7 @@ async function fixture() {
   return job;
 }
 
-test("unified validator reports each QA layer and never calls font-blocked output publishable", async () => {
+test("unified validator reports each QA layer and publishes locally verified fonts", async () => {
   const job = await fixture();
   const {stdout} = await exec(process.execPath, ["scripts/validate-job.mjs", job], {cwd: root});
   const report = JSON.parse(stdout);
@@ -35,8 +35,8 @@ test("unified validator reports each QA layer and never calls font-blocked outpu
   assert.equal(report.technical.ok, true, report.technical.errors.join("\n"));
   assert.equal(report.canonical.ok, true, report.canonical.errors.join("\n"));
   assert.equal(report.content.ok, true, report.content.errors.join("\n"));
-  assert.equal(report.fonts.status, "blocked_by_font");
-  assert.equal(report.publication.ok, false);
+  assert.equal(report.fonts.status, "publishable");
+  assert.equal(report.publication.ok, true);
 });
 
 test("canonical validation fails when generated DOM is manually changed", async () => {

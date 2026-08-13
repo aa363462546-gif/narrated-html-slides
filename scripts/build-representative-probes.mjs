@@ -25,7 +25,7 @@ const decks = [{
     common("scene-03", "完整流程分为三步：理解目标、执行操作、检查结果。", "process", "field-notes-a--process", 3, "三步执行流程"),
   ],
   slides: [
-    {scene_id: "scene-01", layout_id: "field-notes-a--capability-grid", assets: {}, slots: {"eyebrow-01": "MAC WORKFLOW", "title-01": semantic(["Mac 协作", "primary"], ["三项能力", "accent"]), "cap-no-01": "01", "h3-01": "后台执行", "p-01": "任务继续推进，不打断当前操作。", "cap-no-02": "02", "h3-02": "同步推进", "p-02": "人与系统同步推进。", "cap-no-03": "03", "h3-03": "过程留痕", "p-03": "关键步骤可回看、可复核。"}},
+    {scene_id: "scene-01", layout_id: "field-notes-a--capability-grid", assets: {}, slots: {"eyebrow-01": "MAC WORKFLOW", "title-01": semantic(["Mac 协作", "primary"], ["三项能力", "accent"]), "cap-no-01": "01", "h3-01": "后台执行", "p-01": "任务推进，不打断操作。", "cap-no-02": "02", "h3-02": "同步推进", "p-02": "人与系统同步推进。", "cap-no-03": "03", "h3-03": "过程留痕", "p-03": "关键步骤可回看、可复核。"}},
     {scene_id: "scene-02", layout_id: "field-notes-a--dual-compare", assets: {}, slots: {"eyebrow-01": "TOOL BOUNDARY", "title-01": semantic(["同一任务", "primary"], ["两种职责", "accent"]), "compare-label-01": "DIRECT / 整理", "h3-01": "Excel", "p-01": "直接整理内容、公式、格式和图表。", "compare-index-01": "A", "compare-label-02": "AUTOMATE / 自动化", "h3-02": "VBA", "p-02": "把重复步骤变成可复用规则。", "compare-index-02": "B"}},
     {scene_id: "scene-03", layout_id: "field-notes-a--process", assets: {}, slots: {"eyebrow-01": "THREE-STEP FLOW", "title-01": semantic(["从目标", "primary"], ["走到结果", "accent"]), "num-01": "STEP 01", "h3-01": "理解目标", "p-01": "确认输入、范围和完成标准。", "num-02": "STEP 02", "h3-02": "执行操作", "p-02": "按已确认规则完成具体任务。", "num-03": "STEP 03", "h3-03": "检查结果", "p-03": "回读关键内容并确认没有遗漏。", "command-01": "UNDERSTAND → EXECUTE → VERIFY"}},
   ],
