@@ -24,7 +24,14 @@ export function parseSrt(source) {
 
 const requiredSceneFields = ["scene_id", "core_content", "semantic_role", "layout_id", "item_count", "layout_reason", "grouping_reason", "semantic_change"];
 
-export async function finalizeLayoutPlan(draft, source) {
+const sampleRoles = ["core_idea", "named_entities", "structured_content"];
+const sampleSemanticRoles = {
+  core_idea: new Set(["opening", "question", "concept"]),
+  named_entities: new Set(["parallel-items"]),
+  structured_content: new Set(["comparison", "process", "timeline", "roadmap", "closing"]),
+};
+
+export async function finalizeLayoutPlan(draft, source, {artifactScope = draft?.artifact_scope ?? "complete"} = {}) {
   const errors = [];
   if (draft?.version !== 2) errors.push("layout-plan.draft.json must use version 2");
   if (!["text", "srt_audio"].includes(draft?.source_type)) errors.push("source_type must be text or srt_audio");
@@ -36,6 +43,12 @@ export async function finalizeLayoutPlan(draft, source) {
   const ids = new Set();
   let expectedCue = 1;
   const finalScenes = [];
+  if (!["complete", "approval_sample"].includes(artifactScope)) errors.push("artifact_scope must be complete or approval_sample");
+  if (artifactScope === "approval_sample") {
+    if (draft?.source_type !== "srt_audio") errors.push("approval_sample currently requires SRT input so cue ranges remain auditable");
+    if (scenes.length !== 3) errors.push("approval_sample must contain exactly three scenes");
+    if (scenes.length === 3 && scenes.some((scene, index) => scene.sample_role !== sampleRoles[index])) errors.push(`approval_sample roles must be ${sampleRoles.join(", ")} in order`);
+  }
 
   for (const [index, scene] of scenes.entries()) {
     const label = scene?.scene_id || `scene ${index + 1}`;
@@ -54,9 +67,22 @@ export async function finalizeLayoutPlan(draft, source) {
 
     if (draft.source_type === "srt_audio") {
       if (!Number.isInteger(scene.cue_start) || !Number.isInteger(scene.cue_end)) errors.push(`${label}: cue_start/cue_end must be 1-based inclusive integers`);
-      else if (scene.cue_start !== expectedCue || scene.cue_end < scene.cue_start || scene.cue_end > cues.length) errors.push(`${label}: cue ranges must be continuous parsed-order positions; expected cue_start ${expectedCue}`);
+      else if (scene.cue_end < scene.cue_start || scene.cue_end > cues.length) errors.push(`${label}: cue range is invalid`);
+      else if (artifactScope === "complete" && scene.cue_start !== expectedCue) errors.push(`${label}: cue ranges must be continuous parsed-order positions; expected cue_start ${expectedCue}`);
+      else if (artifactScope === "approval_sample" && index > 0 && scene.cue_start <= scenes[index - 1].cue_end) errors.push(`${label}: approval sample cue segments must be ordered and non-overlapping`);
       else {
+        if (artifactScope === "approval_sample" && !String(scene.sample_selection_reason ?? "").trim()) errors.push(`${label}: approval sample needs a specific selection reason`);
         const selected = cues.slice(scene.cue_start - 1, scene.cue_end);
+        if (artifactScope === "approval_sample") {
+          if (!sampleSemanticRoles[scene.sample_role]?.has(scene.semantic_role)) errors.push(`${label}: ${scene.sample_role} requires a matching high-risk semantic role`);
+          if (scene.sample_role === "named_entities") {
+            const names = new Set(selected.flatMap((cue) => [...cue.text.matchAll(/[A-Za-z][A-Za-z0-9.+#/-]*(?:[\t ]+[A-Za-z][A-Za-z0-9.+#/-]*){0,2}/gu)].flatMap((match) => {
+              const tokens = match[0].trim().split(/[\t ]+/u);
+              return tokens.length > 1 && tokens.every((token) => /^[A-Z][A-Z0-9.+#/-]{0,7}$/u.test(token)) ? tokens : [tokens.join(" ")];
+            })));
+            if (names.size < 3) errors.push(`${label}: named_entities sample must contain multiple software or project name candidates`);
+          }
+        }
         finalScenes.push({...scene, narration: selected.map((cue) => cue.text).join("\n"), start_sec: selected[0].start_sec, end_sec: selected.at(-1).end_sec});
         expectedCue = scene.cue_end + 1;
         continue;
@@ -66,10 +92,10 @@ export async function finalizeLayoutPlan(draft, source) {
     }
     finalScenes.push({...scene});
   }
-  if (draft?.source_type === "srt_audio" && expectedCue !== cues.length + 1) errors.push(`SRT cue coverage must end at parsed cue position ${cues.length}`);
+  if (draft?.source_type === "srt_audio" && artifactScope === "complete" && expectedCue !== cues.length + 1) errors.push(`SRT cue coverage must end at parsed cue position ${cues.length}`);
   if (draft?.source_type === "text") {
     const normalize = (value) => String(value).normalize("NFKC").replace(/\s+/gu, "");
     if (normalize(finalScenes.map((scene) => scene.narration ?? "").join("")) !== normalize(source)) errors.push("text scene narration must cover the complete source exactly and in order");
   }
-  return {ok: errors.length === 0, errors, plan: {version: 2, template: draft?.template, source_type: draft?.source_type, cue_numbering: "one_based_inclusive_parsed_order", scenes: finalScenes}};
+  return {ok: errors.length === 0, errors, plan: {version: 2, artifact_scope: artifactScope, template: draft?.template, source_type: draft?.source_type, cue_numbering: "one_based_inclusive_parsed_order", scenes: finalScenes}};
 }

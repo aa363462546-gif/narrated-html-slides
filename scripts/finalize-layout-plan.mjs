@@ -8,7 +8,7 @@ if (!process.argv[2]) throw new Error("Usage: node scripts/finalize-layout-plan.
 const manifest = JSON.parse(await readFile(path.join(jobDir, "manifest.json"), "utf8"));
 const draft = JSON.parse(await readFile(path.join(jobDir, manifest.files.layout_plan_draft), "utf8"));
 const source = await readFile(path.join(jobDir, manifest.files.source), "utf8");
-const result = await finalizeLayoutPlan(draft, source);
+const result = await finalizeLayoutPlan(draft, source, {artifactScope: manifest.artifact_scope ?? "complete"});
 if (!result.ok) {
   console.error(JSON.stringify(result, null, 2));
   process.exit(1);

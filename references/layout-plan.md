@@ -33,7 +33,17 @@ Agents write only cue ranges in `layout-plan.draft.json`. They must not write `s
 }
 ```
 
-Finalization adds exact `start_sec`, `end_sec`, and narration from those cues. Cue ranges must cover all parsed cues once, continuously, and in order.
+Finalization adds exact `start_sec`, `end_sec`, and narration from those cues.
+
+For `complete`, cue ranges cover all parsed cues once, continuously, and in order. For `approval_sample`, the plan contains exactly three ordered, non-overlapping segments. Each segment is internally continuous, but gaps between the three selected segments are allowed because unselected cues are outside sample scope.
+
+The three sample scenes use these roles in order:
+
+1. `core_idea`: a central claim whose hierarchy and explanation test a core concept page.
+2. `named_entities`: software/project-dense parallel content that tests visible names and layout capacity.
+3. `structured_content`: a comparison, process, ordered steps, or conclusion that tests relational structure.
+
+Each scene records `sample_selection_reason`. Selection is semantic and risk-based, not random and not based on duration.
 
 ## Pagination Decisions
 
@@ -44,4 +54,4 @@ Finalization adds exact `start_sec`, `end_sec`, and narration from those cues. C
 - Parallel items may share one capacity-matched layout or split across pages according to meaning and readability.
 - Do not combine clearly different content to reduce page count. Do not split one content unit into repetitive pages without visual need.
 
-Validation checks cue continuity, semantic-change records, registry compatibility, content capacity, coverage mappings, and repeated-page collapse. It performs no duration threshold or page-count calculation.
+Validation checks scope-appropriate cue rules, semantic-change records, registry compatibility, content capacity, coverage mappings, and repeated-page collapse. It performs no duration threshold or page-count calculation.

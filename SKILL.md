@@ -16,14 +16,14 @@ The core deliverable is `slides.html`. Supporting files may include `manifest.js
 1. Run `node scripts/doctor.mjs --json` and read the font publication status.
 2. Read the complete source. Choose one template for the entire deck: Field Notes A for warm editorial narration, or Dark Teal Intelligence for structured evidence-led narration.
 3. Read only that template's `design.md`, its `template.html`, and the shared machine registry at `assets/templates/layout-registry.json`.
-4. Create a job with `node scripts/create-job.mjs <template-id> <job-name> [output-root] --input text|srt_audio`.
-5. Build `coverage-plan.json`: extract important software, projects, people, platforms, steps, numbers, comparisons, conclusions, and parallel items from the source. Map every item to visible page content or give a specific approved omission reason.
+4. Create a job with `node scripts/create-job.mjs <template-id> <job-name> [output-root] --input text|srt_audio --scope complete|approval_sample`.
+5. Build `coverage-plan.json`: extract important software, projects, people, platforms, steps, numbers, comparisons, conclusions, and parallel items from the applicable source scope. SRT extraction operates cue by cue; it never joins names across cue boundaries or blank lines. Classify each candidate as a display-relevant named entity or a specifically explained ordinary spoken term. Map named entities to visible page content or give a specific approved omission reason; do not disguise extraction errors as omissions.
 6. Build `layout-plan.draft.json`. Divide pages by semantic change and visual-display need, not by seconds. A new concept, tool, case, step, relationship, parallel group, or conclusion triggers a decision: keep it only when the current visual theme and registered layout capacity still express it accurately; otherwise add a page.
 7. For SRT input, record `cue_start` and `cue_end` as 1-based inclusive positions in parsed cue order. Do not write `start_sec` or `end_sec`. Run `node scripts/finalize-layout-plan.mjs <job>`; it derives those values from the first and last cue timestamps and writes final `layout-plan.json`.
 8. Write only registered slot values to `slide-content.json`. Agent-authored HTML, CSS, class names, coordinates, font changes, and arbitrary DOM are forbidden.
 9. Run `node scripts/assemble-slides.mjs <job>`. It clones the registered mother section, fills approved slots/assets, applies one validated deck theme, and writes `slides.html`.
 10. Run `node scripts/validate-job.mjs <job>`. Technical, canonical DOM, content coverage, visual, mobile, font, and publication statuses must be reported separately.
-11. Before any complete real article, generate exactly three representative A pages and three representative B pages for user review. Full HTML generation requires explicit approval of those samples.
+11. Before any complete real article, generate an `approval_sample` of exactly three A pages and three B pages for user review. Select three ordered, non-overlapping SRT segments whose internal cue ranges are continuous and represent these risks in order: `core_idea`, `named_entities`, `structured_content`. The second covers software/project-dense parallel content; the third covers a comparison, process, ordered steps, or conclusion. Sample coverage and QA apply only to the selected cue ranges. Full HTML generation and full-source coverage require explicit approval of those samples.
 
 ## Semantic Direction
 
@@ -49,7 +49,7 @@ The core deliverable is `slides.html`. Supporting files may include `manifest.js
 
 - Technical pass means the document opens and operates.
 - Canonical pass means every generated page matches its registered normalized mother skeleton.
-- Content pass means source/SRT coverage and visible evidence are complete.
+- Content pass means the declared scope is covered: selected cue ranges for `approval_sample`, or the entire source/SRT for `complete`.
 - Visual pass means registered density, whitespace, capacity, overlap, bounds, and type rules pass at desktop and phone viewing sizes.
 - Publication pass additionally requires exact approved local fonts.
 - No lower-level pass may be reported as complete HTML acceptance.

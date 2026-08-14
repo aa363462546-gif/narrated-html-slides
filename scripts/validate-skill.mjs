@@ -8,7 +8,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const required = [
   "SKILL.md", "agents/openai.yaml", "references/job-contract.md", "references/layout-plan.md", "references/coverage-plan.md", "references/dependencies.md",
   "scripts/create-job.mjs", "scripts/finalize-layout-plan.mjs", "scripts/create-coverage-plan.mjs", "scripts/assemble-slides.mjs", "scripts/validate-job.mjs",
-  "scripts/lib/plan-contract.mjs", "scripts/lib/coverage-contract.mjs", "scripts/lib/dom-assembler.mjs", "scripts/lib/theme-contract.mjs", "scripts/lib/registry.mjs",
+  "scripts/lib/plan-contract.mjs", "scripts/lib/coverage-contract.mjs", "scripts/lib/dependency-contract.mjs", "scripts/lib/dom-assembler.mjs", "scripts/lib/theme-contract.mjs", "scripts/lib/registry.mjs",
   "assets/fonts/font-inventory.json", "assets/templates/layout-registry.json",
   "assets/templates/field-notes-a/design.md", "assets/templates/field-notes-a/template.html", "assets/templates/dark-teal-intelligence/design.md", "assets/templates/dark-teal-intelligence/template.html",
 ];

@@ -9,6 +9,7 @@ import {validateCanonicalSkeleton} from "./lib/dom-assembler.mjs";
 import {finalizeLayoutPlan} from "./lib/plan-contract.mjs";
 import {readRegistry, registryIndex} from "./lib/registry.mjs";
 import {validateTheme} from "./lib/theme-contract.mjs";
+import {validateDocumentDependencies} from "./lib/dependency-contract.mjs";
 
 const jobDir = path.resolve(process.argv[2] ?? "");
 if (!process.argv[2]) throw new Error("Usage: node scripts/validate-job.mjs <job-directory>");
@@ -55,14 +56,14 @@ if (htmlText) {
     if (node.tagName === "section" && classes.includes("slide")) htmlSections.push(node);
   });
   if (!/width:\s*1920px/iu.test(htmlText) || !/height:\s*1080px/iu.test(htmlText)) fail("technical", "fixed 1920 x 1080 stage is missing");
-  if (/file:\/\/|\/Users\/|[A-Z]:\\/u.test(htmlText)) fail("technical", "generated HTML contains a machine-specific path");
-  if (/frontend-slides|Hyperframes|narrated-video-pipeline|Remocha/iu.test(htmlText)) fail("technical", "generated HTML depends on an external project");
+  const dependencies = validateDocumentDependencies(htmlText);
+  for (const error of dependencies.errors) fail("technical", error);
   if (!/id=["'](?:prev|deckPrev)["']/u.test(htmlText) || !/id=["'](?:next|deckNext)["']/u.test(htmlText)) fail("technical", "visible previous/next controls are missing");
 }
 if (plan && htmlSections.length !== plan.scenes.length) fail("technical", "HTML scene count does not match layout plan");
 
 if (draft && source && plan) {
-  const finalized = await finalizeLayoutPlan(draft, source);
+  const finalized = await finalizeLayoutPlan(draft, source, {artifactScope: manifest?.artifact_scope ?? "complete"});
   if (!finalized.ok) for (const error of finalized.errors) fail("content", error);
   else if (draft.source_type === "srt_audio") {
     for (const [position, scene] of plan.scenes.entries()) {
@@ -78,7 +79,8 @@ if (plan && content) {
 }
 
 if (source && coverage && plan) {
-  const extracted = extractCoverageItems(draft?.source_type === "srt_audio" ? source.replace(/^\d+\s*$|^\d{2}:.*-->.*$/gmu, "") : source);
+  const cueRanges = plan.artifact_scope === "approval_sample" ? plan.scenes.map(({cue_start, cue_end}) => ({cue_start, cue_end})) : null;
+  const extracted = extractCoverageItems(source, {sourceType: draft?.source_type, cueRanges});
   const coverageResult = validateCoveragePlan(coverage, extracted, plan);
   for (const error of coverageResult.errors) fail("content", error);
   const visibleTextByScene = new Map(htmlSections.map((node) => {

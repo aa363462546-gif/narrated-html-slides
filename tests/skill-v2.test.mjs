@@ -13,6 +13,8 @@ test("Skill has one V2 workflow and no time-derived pagination gate", async () =
   assert.match(skill, /cue_start.*cue_end/su);
   assert.doesNotMatch(skill, /6[–-]12|15\s*秒|最低页数|总时长.*页数/iu);
   assert.doesNotMatch(skill, /自由.*HTML|任意.*CSS/iu);
+  assert.match(skill, /approval_sample/iu);
+  assert.match(skill, /core_idea.*named_entities.*structured_content/su);
 });
 
 test("repository contract stays HTML-only and project-isolated", async () => {

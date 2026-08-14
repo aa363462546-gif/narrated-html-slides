@@ -11,12 +11,13 @@ const root = path.resolve(new URL("../", import.meta.url).pathname);
 
 test("create-job writes a v2 self-contained HTML contract without touching audio", async () => {
   const output = await mkdtemp(path.join(os.tmpdir(), "narrated-job-v2-"));
-  const {stdout} = await exec(process.execPath, ["scripts/create-job.mjs", "field-notes-a", "sample", output, "--input", "srt_audio", "--audio-reference", "/input/voice.mp3"], {cwd: root});
+  const {stdout} = await exec(process.execPath, ["scripts/create-job.mjs", "field-notes-a", "sample", output, "--input", "srt_audio", "--scope", "approval_sample", "--audio-reference", "/input/voice.mp3"], {cwd: root});
   const job = stdout.trim();
   const manifest = JSON.parse(await readFile(path.join(job, "manifest.json"), "utf8"));
   assert.equal(manifest.version, 2);
   assert.equal(manifest.input.type, "srt_audio");
   assert.equal(manifest.input.audio_reference, "/input/voice.mp3");
+  assert.equal(manifest.artifact_scope, "approval_sample");
   assert.equal(manifest.files.source, "source.srt");
   assert.equal(manifest.files.slides, "slides.html");
   assert.equal(manifest.files.layout_plan_draft, "layout-plan.draft.json");

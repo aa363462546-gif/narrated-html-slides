@@ -1,6 +1,10 @@
 # Source Coverage Contract
 
-`coverage-plan.json` is produced before slide content. Deterministic extraction identifies Latin product names, quoted names, numbers with units, enumerated steps, list items, comparisons, and explicit conclusions. The Agent may add missed Chinese names or implicit semantic items, but may not remove extracted items.
+`coverage-plan.json` is produced before slide content. Deterministic extraction identifies Latin-name candidates, quoted names, numbers with units, enumerated steps, list items, comparisons, and explicit conclusions. SRT is parsed first and each cue is extracted independently. Names never cross cue boundaries or blank lines; adjacent acronym tokens such as `PS  PR` remain independent candidates.
+
+Extraction candidates are not automatically mandatory display items. Classify genuine software, project, person, platform, step, metric, comparison, conclusion, or explicit parallel item as `named_entity`. A Latin token that is only ordinary speech may use `classification: ordinary_spoken_term`, `status: not_required`, and a specific `classification_reason`. This classification is not an omission and cannot be used to hide an extraction error.
+
+For `approval_sample`, extraction and validation use only the three selected cue ranges. For `complete`, they use the full source.
 
 Every item must be either:
 

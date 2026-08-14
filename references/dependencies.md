@@ -9,3 +9,5 @@
 Run `node scripts/doctor.mjs --json`. Development may continue when a template is `blocked_by_font`, but outputs from that template cannot be called publishable. Runtime network fonts and silent substitutions are not valid publication dependencies.
 
 No audio engine, subtitle generator, video renderer, media CLI, or external project is used by this Skill.
+
+Dependency validation inspects executable and resource references: script/import/require targets, HTML resource attributes, CSS `url()`/`@import`, URLs, and machine-specific or external-project file paths. Visible narration, titles, captions, and `aria-label` text may discuss a project such as Hyperframes without creating a dependency.

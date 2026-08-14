@@ -22,6 +22,15 @@ jobs/<template-id>/<job-name>/
 
 Input and output paths in the manifest are job-relative except an optional user-provided audio reference. Generated HTML must never contain machine-specific absolute paths.
 
+## Artifact Scope
+
+`manifest.json` declares `artifact_scope`:
+
+- `approval_sample`: exactly three representative SRT pages selected before full-deck approval. Validation applies only to their declared cue ranges.
+- `complete`: the final HTML deck. Source coverage applies to the complete text or every parsed SRT cue.
+
+Create sample jobs with `--scope approval_sample`; the default is `complete`. A sample pass never implies complete-deck approval.
+
 ## Slot Content
 
 `slide-content.json` uses registry-backed slot data only:
