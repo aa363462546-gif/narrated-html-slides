@@ -2,3 +2,10 @@ node_modules/
 .DS_Store
 .env
 test-results/
+examples/minimal/assets/
+jobs/
+outputs/
+probes/
+ab-test-*/
+approval-samples-*/
+/dark-teal-intelligence/

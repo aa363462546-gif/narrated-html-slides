@@ -1,0 +1,21 @@
+{
+  "version": 4,
+  "title": "V4 最小示例",
+  "template": "field-notes-a",
+  "theme": {"preset": "botanical-deep"},
+  "source": {
+    "type": "text",
+    "text": "ChatGPT 和 Excel 可以共同处理内容、公式、格式和图表。"
+  },
+  "permissions": {"generated_images": false, "external_assets": false},
+  "pages": [
+    {
+      "id": "scene-01",
+      "source_text": "ChatGPT 和 Excel 可以共同处理内容、公式、格式和图表。",
+      "visual_form": "relationship",
+      "content_html": "<div class=\"free-page\"><p class=\"eyebrow\">WORKFLOW</p><h1>ChatGPT 连接 Excel</h1><p>把内容、公式、格式和图表放进一条清晰的自动化工作流。</p></div>",
+      "must_show": {"terms": ["ChatGPT", "Excel"], "groups": [["内容", "公式", "格式", "图表"]]},
+      "assets": {}
+    }
+  ]
+}

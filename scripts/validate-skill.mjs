@@ -1,34 +1,60 @@
 #!/usr/bin/env node
-import {access, readFile} from "node:fs/promises";
+import {execFile} from "node:child_process";
+import {mkdir, mkdtemp, readFile, rm, writeFile} from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
-import {fileURLToPath} from "node:url";
-import {parse} from "parse5";
+import {promisify} from "node:util";
+import {readTemplateModel} from "./lib/v3-runtime.mjs";
+import {parseFragment, serialize} from "parse5";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const required = [
-  "SKILL.md", "agents/openai.yaml", "references/job-contract.md", "references/layout-plan.md", "references/coverage-plan.md", "references/dependencies.md",
-  "scripts/create-job.mjs", "scripts/finalize-layout-plan.mjs", "scripts/create-coverage-plan.mjs", "scripts/assemble-slides.mjs", "scripts/validate-job.mjs",
-  "scripts/lib/plan-contract.mjs", "scripts/lib/coverage-contract.mjs", "scripts/lib/dependency-contract.mjs", "scripts/lib/dom-assembler.mjs", "scripts/lib/theme-contract.mjs", "scripts/lib/registry.mjs",
-  "assets/fonts/font-inventory.json", "assets/templates/layout-registry.json",
-  "assets/templates/field-notes-a/design.md", "assets/templates/field-notes-a/template.html", "assets/templates/dark-teal-intelligence/design.md", "assets/templates/dark-teal-intelligence/template.html",
-];
-for (const relative of required) await access(path.join(root, relative));
-const [skill, registryText, aHtml, bHtml] = await Promise.all([
-  readFile(path.join(root, "SKILL.md"), "utf8"), readFile(path.join(root, "assets/templates/layout-registry.json"), "utf8"),
-  readFile(path.join(root, "assets/templates/field-notes-a/template.html"), "utf8"), readFile(path.join(root, "assets/templates/dark-teal-intelligence/template.html"), "utf8"),
-]);
-if (!/^name:\s*narrated-html-slides\s*$/mu.test(skill.match(/^---\n([\s\S]*?)\n---/u)?.[1] ?? "")) throw new Error("Invalid Skill name");
-if (/6[–-]12|15\s*(?:秒|second)|minimum page|最低页数/iu.test(skill)) throw new Error("Skill still contains a time-based pagination gate");
-const executableSource = await Promise.all(["scripts/create-job.mjs", "scripts/finalize-layout-plan.mjs", "scripts/create-coverage-plan.mjs", "scripts/assemble-slides.mjs", "scripts/validate-job.mjs"].map((file) => readFile(path.join(root, file), "utf8")));
-if (executableSource.some((source) => /(?:from|import\s*\()\s*["'](?:\/Users\/|\.\.\/\.\.\/)/u.test(source))) throw new Error("Executable code imports outside the Skill project");
-const registry = JSON.parse(registryText);
-if (registry.layouts.length !== 51) throw new Error("Registry must contain exactly 51 layouts");
-const ids = new Set(registry.layouts.map((item) => item.layout_id));
-if (ids.size !== 51) throw new Error("Every layout_id must be unique");
-for (const [template, html, count] of [["field-notes-a", aHtml, 20], ["dark-teal-intelligence", bHtml, 31]]) {
-  const document = parse(html); const found = [];
-  const walk = (node) => { if (node.tagName === "section") { const id = node.attrs?.find((item) => item.name === "data-layout-id")?.value; if (id) found.push(id); } for (const child of node.childNodes ?? []) walk(child); };
-  walk(document);
-  if (found.length !== count || found.some((id) => !ids.has(id))) throw new Error(`${template} mother layout IDs do not match the registry`);
+const exec = promisify(execFile);
+const root = path.resolve(new URL("../", import.meta.url).pathname);
+const expectedCounts = {"field-notes-a": 20, "dark-teal-intelligence": 31};
+const result = {ok: true, layouts: {}, themes: {}, total: 0};
+const tempRoot = await mkdtemp(path.join(os.tmpdir(), "narrated-html-slides-v3-publish-"));
+const serializeChildren = (children) => serialize({nodeName: "#document-fragment", childNodes: children});
+
+try {
+  for (const [template, expectedCount] of Object.entries(expectedCounts)) {
+    const templatePath = path.join(root, "assets", "templates", template, "template.html");
+    const html = await readFile(templatePath, "utf8");
+    if (/fonts\.googleapis|fonts\.gstatic|@import\s+url\(\s*["']?https?:/iu.test(html)) throw new Error(`${template}: runtime network font found`);
+    const model = readTemplateModel(html, template);
+    if (model.layouts.size !== expectedCount) throw new Error(`${template}: expected ${expectedCount} layouts, found ${model.layouts.size}`);
+    const fullIds = new Set([...model.layouts.values()].map((layout) => layout.fullId));
+    if (fullIds.size !== expectedCount) throw new Error(`${template}: duplicate layout id`);
+    for (const [layoutId, layout] of model.layouts) {
+    }
+    result.layouts[template] = model.layouts.size;
+    result.themes[template] = [...model.themes];
+    result.total += model.layouts.size;
+
+    for (const theme of model.themes) {
+      const job = path.join(tempRoot, `${template}-${theme}`);
+      await mkdir(path.join(job, "assets"), {recursive: true});
+      await writeFile(path.join(job, "assets", "integrity.svg"), '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><rect width="1200" height="800" fill="#444"/></svg>', "utf8");
+      const pages = [...model.layouts.entries()].map(([layoutId, layout], index) => {
+        const pageId = `scene-${String(index + 1).padStart(2, "0")}`;
+        const sourceText = `${layoutId}母版完整性测试。`;
+        const contentHtml = `<div class="integrity-probe"><h1>${layoutId}</h1></div>`;
+        return {id: pageId, source_text: sourceText, visual_form: layoutId, content_html: contentHtml, must_show: {terms: [layoutId], groups: []}, assets: {}};
+      });
+      const deck = {
+        version: 4,
+        title: `${template} integrity`,
+        template,
+        theme: {preset: theme},
+        source: {type: "text", text: pages.map((page) => page.source_text).join("")},
+        permissions: {generated_images: false, external_assets: true},
+        pages,
+      };
+      await writeFile(path.join(job, "deck.json"), `${JSON.stringify(deck, null, 2)}\n`, "utf8");
+      await exec(process.execPath, ["scripts/assemble-slides.mjs", job], {cwd: root, maxBuffer: 10 * 1024 * 1024});
+      await exec(process.execPath, ["scripts/validate-job.mjs", job], {cwd: root, maxBuffer: 10 * 1024 * 1024});
+    }
+  }
+} finally {
+  await rm(tempRoot, {recursive: true, force: true});
 }
-console.log(JSON.stringify({ok: true, layouts: {"field-notes-a": 20, "dark-teal-intelligence": 31, total: 51}}));
+
+console.log(JSON.stringify(result));

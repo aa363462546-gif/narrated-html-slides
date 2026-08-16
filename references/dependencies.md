@@ -1,13 +1,9 @@
-# Local Dependencies And Publication Status
+# Runtime Dependencies
 
 - Node.js 22 or newer.
-- A Chromium-family browser.
-- `parse5` for deterministic DOM parsing and serialization.
-- `puppeteer-core` for rendered desktop and phone QA.
-- Exact approved local font files and their licenses for publication.
+- `parse5` for deterministic mother-template assembly.
+- The local font files referenced by the selected `template.html`.
 
-Run `node scripts/doctor.mjs --json`. Development may continue when a template is `blocked_by_font`, but outputs from that template cannot be called publishable. Runtime network fonts and silent substitutions are not valid publication dependencies.
+No audio engine, subtitle generator, video renderer, media CLI, runtime web font, Hyperframes dependency, or external project is used.
 
-No audio engine, subtitle generator, video renderer, media CLI, or external project is used by this Skill.
-
-Dependency validation inspects executable and resource references: script/import/require targets, HTML resource attributes, CSS `url()`/`@import`, URLs, and machine-specific or external-project file paths. Visible narration, titles, captions, and `aria-label` text may discuss a project such as Hyperframes without creating a dependency.
+Per-task validation checks only resources actually used by that output. The complete A20+B31 mother and font-library integrity test belongs to Skill publication and runs through `npm run validate-skill`.

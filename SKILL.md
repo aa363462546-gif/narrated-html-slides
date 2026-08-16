@@ -1,65 +1,41 @@
 ---
 name: narrated-html-slides
-description: Turn a complete Chinese script, or matching SRT plus audio inputs, into stable speaker-led slides.html using the bundled Field Notes A or Dark Teal Intelligence templates. This Skill outputs HTML and planning/QA files only; it never generates, edits, mixes, or renders audio or video.
+description: Turn a complete Chinese script or matching SRT plus audio into speaker-led slides.html using the Field Notes A or Dark Teal Intelligence visual systems. The skill creates HTML and QA files only; it never processes audio or renders video.
 ---
 
 # Narrated HTML Slides
 
-## Boundary
+## Product
 
-This is a self-contained HTML slide Skill. Read only files inside this Skill and the user-provided input paths. Never read or depend on `frontend-slides`, Hyperframes, Remocha, `narrated-video-pipeline`, or another project directory.
+This creates the visual track that accompanies narration. SRT is the complete spoken text plus timing; the HTML is what the viewer sees while that text is spoken. Do not make an article-summary deck or a fixed sequence of template cards.
 
-The core deliverable is `slides.html`. Supporting files may include `manifest.json`, `layout-plan.json`, `coverage-plan.json`, `slide-content.json`, and QA reports. SRT supplies ordered cue text and timestamps for traceability. Matching audio may be recorded as an input reference, but this Skill never opens, analyzes, copies, edits, generates, or combines audio. It never renders video. A separately requested complete-video task belongs to the independent `narrated-video-pipeline` after the HTML is approved.
+When the user provides a complete script or SRT and asks for generation, treat it as a new task: understand that input from the beginning and run the current Skill workflow from the beginning. For a new task, read only the user-provided input for this task, this current `SKILL.md` and `references/job-contract.md`, the selected template files, and the current assembly and validation scripts they import. Do not list, search, inspect, diff, open, or copy `jobs/`, `outputs/`, or any other historical task directory. Do not use a historical task as a content source, pagination hint, page-count hint, template, run reference, or shortcut, even when its input appears identical. Only when the user explicitly asks to inspect or continue a named historical task may you read that named task; that permission does not extend to other historical tasks or to an unrelated new generation.
 
-## Director Workflow
+## One-way workflow
 
-1. Run `node scripts/doctor.mjs --json` and read the font publication status.
-2. Read the complete source. Choose one template for the entire deck: Field Notes A for warm editorial narration, or Dark Teal Intelligence for structured evidence-led narration.
-3. Read only that template's `design.md`, its `template.html`, and the shared machine registry at `assets/templates/layout-registry.json`.
-4. Create a job with `node scripts/create-job.mjs <template-id> <job-name> [output-root] --input text|srt_audio --scope complete|approval_sample`.
-5. Build `coverage-plan.json`: extract important software, projects, people, platforms, steps, numbers, comparisons, conclusions, and parallel items from the applicable source scope. SRT extraction operates cue by cue; it never joins names across cue boundaries or blank lines. Classify each candidate as a display-relevant named entity or a specifically explained ordinary spoken term. Map named entities to visible page content or give a specific approved omission reason; do not disguise extraction errors as omissions.
-6. Build `layout-plan.draft.json`. Divide pages by semantic change and visual-display need, not by seconds. A new concept, tool, case, step, relationship, parallel group, or conclusion triggers a decision: keep it only when the current visual theme and registered layout capacity still express it accurately; otherwise add a page.
-7. For SRT input, record `cue_start` and `cue_end` as 1-based inclusive positions in parsed cue order. Do not write `start_sec` or `end_sec`. Run `node scripts/finalize-layout-plan.mjs <job>`; it derives those values from the first and last cue timestamps and writes final `layout-plan.json`.
-8. Write only registered slot values to `slide-content.json`. Agent-authored HTML, CSS, class names, coordinates, font changes, and arbitrary DOM are forbidden.
-9. Run `node scripts/assemble-slides.mjs <job>`. It clones the registered mother section, fills approved slots/assets, applies one validated deck theme, and writes `slides.html`.
-10. Run `node scripts/validate-job.mjs <job>`. Technical, canonical DOM, content coverage, visual, mobile, font, and publication statuses must be reported separately.
-11. Before any complete real article, generate an `approval_sample` of exactly three A pages and three B pages for user review. Select three ordered, non-overlapping SRT segments whose internal cue ranges are continuous and represent these risks in order: `core_idea`, `named_entities`, `structured_content`. The second covers software/project-dense parallel content; the third covers a comparison, process, ordered steps, or conclusion. Sample coverage and QA apply only to the selected cue ranges. Full HTML generation and full-source coverage require explicit approval of those samples.
+1. Start at cue 1 or the first sentence and read the script or SRT in source order. Rejoin only the current subtitle fragments into the spoken sentence and follow the speaker's actual progression; do not read ahead to summarize the complete source first.
+2. Process one short, continuous spoken section at a time and immediately write its page before reading the next section. Never read the whole source and then create a topic list, chapter outline, shot list, or page-count estimate.
+3. End the current page at the first cue whose spoken content the current page cannot visibly explain. A new object, software, example, action, relationship, result, question, or turn ends the current page; sharing one broad topic does not keep it open.
+4. The page must visibly explain the section just processed, rather than name a broad topic. Put its subject in the largest and clearest treatment and use the remaining space for context, reason, example, step, relationship, or evidence from that same section. A software name must be the visible subject when introduced, not a small tag. A quoted line, question, personal experience, analogy, setback, or short transition may be its own page.
+5. The page count is unknown until this cue-by-cue pass finishes. Do not compress different spoken sections into a chapter card or shrink text to make a summary fit. Do not announce or outline the final page count before pages have been written in source order.
+6. Choose A or B as the visual system. A user-specified template is locked. After the source-order page sequence has been written, read the selected template's actual sections and choose the existing mother layout for each page. The template supplies the DOM, CSS, typography, colors, spacing, and components.
+7. Write the single `deck.json` in source order as each page is completed. Each page must copy the chosen mother layout's HTML structure and replace its audience-facing text with the spoken section just processed. Do not write a new layout, inline positioning system, new class, or new CSS variable. If no existing mother can carry the section, choose the closest honest mother and split it; report the missing capacity instead of redesigning the template. `must_show` records names and parallel items already identified from the source; it is a reminder for the author, not a substitute for showing them and not a reason to repeat them.
+8. Before assembly, check every page against its own cues. `cue_range`, hidden narration, `aria-label`, and a keyword placed in a corner do not count as visible explanation. If a page does not visibly explain its cues, split that page before continuing.
+9. Assemble and run Build only after all source-order pages are written. Build checks the deck, selected template, source mapping, safe markup, assets, fonts, and final HTML consistency. It does not judge whether the narration was understood or whether the page is attractive; those remain a visual review with the user.
 
-## Semantic Direction
+There is no fixed page count, fixed duration, minimum duration, maximum duration, Director file, layout plan, coverage plan, or second content contract. A meaningful beat may last briefly; a page may remain longer only while it remains an accurate explanation of the spoken content.
 
-- One slide has one primary claim and no more than three information levels.
-- Keep full narration traceable while distilling visible copy. Never paste subtitle blocks into a display headline.
-- Comparisons use comparison structures; parallel items use capacity-matched cards/lists; ordered steps use process/timeline structures; evidence and metrics use their real registered families.
-- A page may remain visible for a long explanation when it still communicates the same accurate visual idea. Fast semantic changes may require short pages. Time length never determines page count.
-- Parallel items may share a registered multi-item page or split across pages according to meaning, capacity, and readability.
-- Important source names and enumerated items must be visible, not hidden only in `aria-label`.
-- Do not omit facts, repeat the same visible sentence across roles, collapse distinct content into one generic headline, or split one idea into repetitive near-identical pages.
-- If content does not fit, choose another production layout or split the page. Never shrink fonts, move coordinates, change card structure, or hide overflow.
-- Prefer user-provided real images and evidence. Never generate images without explicit user authorization. If a required asset is missing, choose a non-asset layout.
+## Content and composition
 
-## Theme And Emphasis
+- The page is a visual explanation, not a subtitle wall. Use the selected system's typography, spacing, diagrams, relationships, lists, screenshots, quotes, and transitions when they help the viewer understand.
+- Questions, setup, personal experience, analogy, attempt, setback, pivot, explanation, steps, evidence, and conclusion are all valid visual sections. Do not flatten them into one knowledge-summary page.
+- A page range is not complete merely because its headline names the overall topic. The supporting visual must also carry the meaningful setup, qualification, example, action, or change spoken inside that range.
+- A/B selects the visual identity and its available mother layouts. Let the narration decide the page order and which existing layout is appropriate; do not invent a third layout in page HTML.
+- If the current visual system cannot express a needed section, preserve the section with the nearest honest composition and report the missing visual expression. Do not silently delete it or force it into an unrelated card.
+- Keep page HTML audience-facing. Do not expose planning labels or describe the source as an outside report.
+- Use `must_show.terms` for important names, tools, projects, people, platforms, and numbers. Use `must_show.groups` for complete parallel items. These are coverage reminders, not permission to repeat text.
+- Use plain, local assets only when the deck permissions allow them. Do not process or inspect audio.
 
-- A template fixes its visual language and font character, not one permanent color palette.
-- Select one registered theme preset or submit one deck-wide semantic theme that passes the template's range, relationship, and contrast rules.
-- No per-page themes, arbitrary CSS, or free color values outside the theme contract.
-- A semantic title may contain multiple discontinuous emphasized segments, but the whole title may resolve to at most two distinct semantic colors. The Agent submits segments and tones; the assembler owns the spans and classes.
-- A and B never exchange fonts. Missing approved fonts block publication; substitutions are forbidden.
+## Contract and checks
 
-## Acceptance Meaning
-
-- Technical pass means the document opens and operates.
-- Canonical pass means every generated page matches its registered normalized mother skeleton.
-- Content pass means the declared scope is covered: selected cue ranges for `approval_sample`, or the entire source/SRT for `complete`.
-- Visual pass means registered density, whitespace, capacity, overlap, bounds, and type rules pass at desktop and phone viewing sizes.
-- Publication pass additionally requires exact approved local fonts.
-- No lower-level pass may be reported as complete HTML acceptance.
-
-## Resources
-
-- `assets/templates/layout-registry.json`: single machine source for all A20 plus B31 layouts.
-- `assets/templates/<template>/design.md`: template selection, capacity, visual character, theme, and prohibited use.
-- `assets/templates/<template>/template.html`: exact mother DOM, geometry, components, and font roles.
-- `references/job-contract.md`: inputs, outputs, slots, assets, and manifests.
-- `references/layout-plan.md`: semantic pagination and SRT cue contract.
-- `references/coverage-plan.md`: automatic source coverage contract.
-- `references/dependencies.md`: local runtime and publication requirements.
+Use [references/job-contract.md](references/job-contract.md). The single assembler produces `slides.html`. Build checks the deck, selected template, source mapping, safe page HTML, visible requirements, assets, fonts, and navigation. Build does not prove semantic understanding, visual timing, or visual quality. The user must watch the visual track against the narration before accepting it.

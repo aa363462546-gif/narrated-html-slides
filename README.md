@@ -1,29 +1,28 @@
 # Narrated HTML Slides
 
-A self-contained Codex Skill for turning complete articles, or matching SRT plus audio inputs, into fixed-stage HTML slides. It ships with two production templates:
+A self-contained Codex Skill that turns a complete Chinese script, or matching SRT plus an audio reference, into fixed-stage HTML slides. It ships with Field Notes A and Dark Teal Intelligence.
 
-- Field Notes A: deep-green botanical editorial style.
-- Dark Teal Intelligence: charcoal and teal evidence-led report style.
+The runtime chain is intentionally small:
 
-The core product is `slides.html`; manifests, layout plans, coverage plans, and QA reports are supporting artifacts. SRT is used for cue traceability and semantic pagination. A matching audio path may be recorded as an input reference, but this Skill never opens, processes, generates, mixes, or renders audio or video and never reads another project.
+```text
+user instruction → deck.json → template.html → slides.html
+                 → Build → user visual review
+```
 
-## Install
+The Skill never opens or processes audio and never renders video. `template.html` is the sole machine source for each template's DOM, CSS, fonts, components, and controlled themes.
 
-Clone this repository, then install it as a Codex Skill by copying or linking the repository directory into your Codex Skills directory. Restart Codex after installation.
-
-For HTML QA:
+## Commands
 
 ```bash
 npm install
-node scripts/doctor.mjs
+node scripts/assemble-slides.mjs /absolute/path/to/job
+node scripts/validate-job.mjs /absolute/path/to/job
 ```
 
-Invoke it with `$narrated-html-slides` and provide a complete article or narration script.
+Run the full A20+B31 integrity test only when publishing or changing the Skill:
 
-## What It Produces
+```bash
+npm run validate-skill
+```
 
-Each job keeps its source and generated `slides.html` together. See `references/job-contract.md`.
-
-## License
-
-Code and documentation are licensed under MIT. Bundled fonts retain their own licenses under `assets/fonts/`.
+See `references/job-contract.md` for the current single-deck input format.
