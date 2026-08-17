@@ -1,4 +1,0 @@
-interface:
-  display_name: "Narrated HTML Slides"
-  short_description: "Turn articles into stable HTML slides with A/B templates"
-  default_prompt: "Use $narrated-html-slides to turn this complete script, or matching SRT plus an audio reference, into one deck.json, slides.html, and Build QA only. Report the selected template first. Never process audio or render video."

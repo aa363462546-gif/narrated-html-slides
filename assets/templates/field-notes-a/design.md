@@ -2,33 +2,105 @@
 
 Field Notes A is warm, editorial, reflective, and speaker-led. Botanical line geometry, restrained texture, serif display copy, sans-serif explanation, and mono labels suit education, creator workflows, personal knowledge, psychology, and narrative explanation.
 
-## Layout purposes
+`template.html` 中的页面是视觉示例库，不是页面清单。只有口播的连续画面和页数已经确定以后，才检查这些示例并选择合适结构；示例可以重复使用，也可以完全不用，示例数量不得影响成品页数。
 
-- `cover`: opening title and support statement.
-- `question`: one question with two interpretations.
-- `core-idea`: one central concept and visual metaphor.
-- `capability-grid`: three parallel capabilities.
-- `platform-list`: a compact set of named platforms or categories.
-- `data-fields`: several data types plus one conclusion.
-- `process`: three ordered steps.
-- `caution`: risks, prohibitions, or ethical boundaries.
-- `support`: one lead idea with supporting guidance.
-- `closing`: concise takeaway or call to action.
-- `single-card`: one concept requiring a full framed surface.
-- `dual-compare`: two equal comparison sides.
-- `stacked-compare`: a not-this/but-that relationship.
-- `quote-card`: one memorable statement or question.
-- `quad-card-grid`: four peer items.
-- `six-card-grid`: six short peer items.
-- `split-vertical-list`: one claim with three supporting items.
-- `hierarchy-stack`: three semantic levels.
-- `tool-list`: three named tools or products.
-- `large-explainer`: one statement with substantial explanation.
+## 核心原则
 
-## Visual character
+Field Notes A 固定的是视觉语言，不是页面结构。先从 `template.html` 选择与当前内容天然匹配的现成页面并完整复用；没有合适版式时，直接按本说明设计新布局。
 
-Use one controlled theme preset for the entire deck. `botanical-deep` is dark green with lime and earth accents; `copper-night` is warm charcoal with copper and sage accents. Keep the editorial hierarchy, botanical grammar, and Field Notes font identity regardless of preset.
+新布局可以自由决定信息区域的数量、大小、方向和排列，也可以新增表格、图表、时间线、关系图、截图区等内容结构。字体体系、字号尺度、颜色角色、空间节奏、边框、表面、植物装饰和动画仍必须属于 Field Notes A，不重新发明另一套视觉系统。
 
-Use the preset's semantic tones to make meaning visible: a key title phrase, narrative turn, contrast, or core conclusion can carry an accent when that distinction helps the audience read the page. Some pages may need no color contrast, but the deck should not become uniformly single-tone when the narration contains real hierarchy. Avoid fixed color pairs, mandatory two-color pages, and decorative rainbow emphasis.
+优先复用模板已有的 `.slide`、`.frame`、`.eyebrow`、`.title`、`.sub`、`.page`、`.reveal`、语义颜色类和植物装饰。新增 CSS 主要负责新布局的排列、区域尺寸和特定图形；不要重新定义全局字体、主题颜色、舞台、导航或动画。
 
-Choose layouts by the purposes above. The real mother structure, fonts, theme presets, and fillable fields live only in `template.html`.
+## 画布与空间
+
+- 舞台固定为 `1920 × 1080px`，所有页面保持这个坐标系统。
+- `.frame` 固定向内 `46px`，使用 `1px solid var(--fn-line)`。它是整套页面的视觉边界，不是内容容器。
+- 主要内容通常位于左右距画布 `90–150px`、上下距画布 `90–145px` 的区域。标题、正文和关键图形不得贴住外框。
+- `.page` 保持右侧 `88px`、底部 `68px` 的原生位置。新布局必须给页码留出空间。
+- 紧凑间距使用 `18–22px`，普通区域间距使用 `28–42px`，标题与主内容或大型区域之间使用 `46–82px`。优先从模板已有的 `18、20、22、28、32、34、38、40、42、46、54、64、68、76、82px` 节奏中选择。
+- 普通卡片内边距以 `28–52px` 为主；承担核心解释的大卡片可使用 `62–110px`。不要为了显得“高级”而把可用内容区压得很小。
+- 内容较少时，放大标题、核心文字、图形或卡片，使主体充分占用主要区域；不要把内容缩在角落，也不要留下没有构图作用的大面积空白。
+- 内容超过当前布局的自然容量时换页。不得通过缩小字号、压缩行高或挤窄卡片来塞入更多内容。
+
+## 字体系统
+
+只使用模板已加载的三种字体：
+
+- `Noto Serif SC` / `var(--serif)`：标题、卡片标题、金句、核心观点和重要数字。字重以 `700–900` 为主。
+- `Noto Sans SC` / `var(--sans)`：解释、正文、说明和辅助结论。字重以 `400–500` 为主。
+- `DM Mono` / `var(--mono)`：eyebrow、页码、步骤编号、英文标签和非核心元数据。字重使用 `400–500`。
+
+新页面优先直接使用 `.title`、`.sub` 和 `.eyebrow`。只有内容角色确实不同且现有类不适合时，才在以下原生尺度内新增局部类：
+
+| 文字角色 | 原生字号范围 | 建议行高 | 使用方式 |
+| --- | ---: | ---: | --- |
+| 封面或展示标题 | `122–144px` | `1.08–1.10` | 开场、收束、单一强观点 |
+| 普通页面标题 | `88–108px` | `1.08–1.20` | 页面主标题，通常两到三行以内 |
+| 信息较密标题 | `72–88px` | `1.10–1.22` | 四宫格、六宫格或标题较长的页面 |
+| 金句或核心引文 | `82px` 左右 | `1.28` | 独立金句、关键提问 |
+| 卡片与分组标题 | `40–66px` | `1.18–1.25` | 项目名、步骤名、对比项、层级名 |
+| 重点解释 | `48–54px` | `1.38–1.52` | `.sub`、核心说明、关键结论 |
+| 正文 | `36–48px` | `1.38–1.50` | 原因、案例、步骤、证据和解释 |
+| 标签、编号、页码 | `18–30px` | `1.2–1.4` | 英文 eyebrow、页码、序号、短元数据 |
+
+承担口播意义的正文不得低于 `36px`。`18–30px` 只能承载页码、编号、英文标签和可省略的元数据，不能用来放主要解释、软件介绍、案例或结论。
+
+中文显示文字的字距保持模板原生设置：大标题可使用紧凑字距，正文不另加负字距。正文行高保持舒展；不要用紧行高换容量。字数变多时直接拆页，不建立第四套字号层级。
+
+## 主题与颜色
+
+一份成品只选择一个主题 preset，并在全部页面保持一致：
+
+- `botanical-deep`：深植物绿背景，米白文字，酸橙色主强调，土棕色次强调。
+- `copper-night`：暖炭黑背景，暖白文字，铜金色主强调，鼠尾草绿色次强调。
+
+颜色只能来自 `template.html` 已定义的 CSS 变量。新布局不得新增任意 hex、RGB 值或第三套配色。
+
+- 背景使用 `--fn-bg-base` 及原生 atmosphere 变量。
+- 主文字使用 `--fn-text-primary`；解释文字使用 `--fn-text-secondary`；非核心元数据使用 `--fn-text-muted`。
+- 关键词、核心结论和当前焦点使用 `--fn-accent-primary` 或 `.semantic-accent-primary`。
+- 转折、另一侧对比和第二层信息使用 `--fn-accent-secondary` 或 `.semantic-accent-secondary`。
+- 普通文字可使用 `.semantic-text-primary`；语义颜色只包裹有意义的词组，不整段染色。
+- 边框和分隔线使用 `--fn-line`；卡片与区域表面使用现有 `--fn-surface-*` 变量及其 RGB 透明写法。
+
+不是每页都必须双色。颜色用于解释层级，而不是装饰：只有出现关键词、转折、对比或结论时才强调；一页内不要把所有文字都做成强调色，也不要引入彩虹式配色。
+
+## 视觉语法
+
+- 每页保留 Field Notes A 的深色植物氛围：径向背景层、克制颗粒和细线结构。不要改成纯色扁平底、明亮白底或通用渐变背景。
+- `.frame` 的细线外框和中轴线是稳定识别元素。新页面应保留外框；中轴线可以作为背景结构存在，不要求内容机械左右对称。
+- 叶片、枝干、根系和种子是植物笔记语法。使用现有 `.leaf`、`.stem`、`.root`、`.seed` 组合，作为构图平衡或内容关系的辅助，不遮挡文字，不让每页都堆满植物。
+- 内容卡片使用 `1px` 细线、原生半透明深色表面和直角结构。重点边缘可使用 `3px` 主强调色或次强调色顶线。
+- 普通结构卡片保持直角。圆角、圆形和有机曲线只用于叶片、种子、节点或数据图形，不把页面做成圆角 dashboard、玻璃拟态、发光面板或阴影 UI。
+- 深度来自透明表面、细线、色彩和字号层级，不使用厚重投影、浮层阴影、霓虹光或拟物高光。
+
+## 新布局的表达方法
+
+以下是可自由生成的内容结构，不是必须新增的固定 HTML 模板。先判断信息关系，再用同一套字体、颜色、细线、表面和植物装饰完成：
+
+- **表格**：使用直角外框和 `1px var(--fn-line)` 分隔；表头用 mono 标签或 serif 分组标题，单元格正文不小于 `36px`。列数过多时拆页，不缩成数据报表小字。
+- **柱状图与数据图**：轴线和刻度使用细线与 mono 元数据；核心数值使用 serif 大字，普通系列使用文本或表面变量，重点系列使用主强调色。图表必须占据主要区域，不能缩成角落里的装饰。
+- **时间线**：使用细线作为主轴、种子或小圆点作为节点；时间标签用 mono，事件标题用 serif，解释用 sans。节点较多时延续到下一页。
+- **关系图与层级图**：使用细线连接直角卡片或文字节点；通过字号、位置和主次强调色表达层级，不依赖大量小箭头和小字说明。
+- **流程**：步骤编号用 mono，步骤标题用 serif，说明用 sans；连接线沿用 `--fn-line`，当前步骤可用主强调色。步骤超过当前页面容量时继续下一页。
+- **软件或项目展示**：产品名、软件名或项目名必须成为可见主信息，可配一句明确作用说明；不要把名称藏在小标签里。多个对象按实际口播顺序逐项或分组展示。
+- **截图与真实画面**：让图像成为可辨认的主要区域，使用细线直角边框或原生深色表面承托；标题和解释仍使用 A 的字体层级。不要用厚圆角设备壳、通用浏览器 mockup 或重阴影改变风格。
+- **前后对比**：两侧保持同等视觉权重，使用主、次强调色区分关系；若口播先后展开两个状态，可以拆成连续页面，不必强行同屏。
+- **金句与短转折**：使用大号 serif 文字、少量强调色和克制植物装饰；正文不需要用小字重复解释同一句话。
+
+## 动画
+
+新页面只沿用 `.reveal`：元素从下方 `26px` 淡入，使用模板的 `.75s` 时长和 `var(--ease)` 缓动。按 eyebrow、标题、主体、辅助信息的阅读顺序设置 `--hf-reveal-delay`，形成克制的错峰入场。
+
+不要新增弹跳、旋转入场、霓虹闪烁、持续漂浮或与 Field Notes A 无关的转场。植物装饰也应安静地服务构图，不成为持续抢注意力的动画主体。
+
+## 新页面构造步骤
+
+1. 当前口播画面已经确定后，再检查 `template.html` 中的现有页面；合适时复制完整 `<section class="slide">` 并替换内容。
+2. 没有合适版式时，保留 `.slide`、`.frame`、`.page` 和背景系统，确定这一页需要的标题、主体与辅助信息区域。
+3. 从 `.eyebrow`、`.title`、`.sub`、语义颜色类、直角卡片、细线和植物元素中复用所需组件。
+4. 只为新信息结构补充局部布局 CSS，并使用本文的原生字号、间距与现有颜色变量。
+5. 内容不足时扩大主体；内容超量时拆页。完成后确认主要信息没有低于 `36px`，也没有无意义的大面积空白。
+
+最终检查归属感：把新页面插在两张原生 Field Notes A 页面之间。如果它的字体、字号、颜色、边距、线条、表面、植物装饰或动画明显像另一套模板，就重新调整；如果只看到信息结构变了，但仍能一眼认出是 Field Notes A，才算完成。
